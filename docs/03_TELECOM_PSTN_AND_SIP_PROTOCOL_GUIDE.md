@@ -1,29 +1,33 @@
 # 📞 VoxPulse AI - Telecom, PSTN & SIP Protocol Guide
-> **Document Version:** 1.0.0-enterprise  
+> **Document Version:** 1.1.0-enterprise  
 > **Classification:** Technical Protocol Specification  
 > **Target Audience:** Telecom Engineers, SBC Administrators, Carrier Routing Operations  
 
 ---
 
-## 1. SIP Protocol Architecture (RFC 3261)
+## 1. SIP Protocol Architecture (RFC 3261, RFC 3262, RFC 3515)
 
 VoxPulse AI integrates directly with Session Border Controllers (SBCs) and carrier softswitches.
 
-### 1.1 SIP Dialog Lifecycle
+### 1.1 SIP Dialog Lifecycle & 100rel PRACK Sequence (RFC 3262)
 
 ```
-VoxPulse Softphone              SBC / Proxy                     PSTN Carrier
+VoxPulse Softswitch             SBC / Proxy                     PSTN Carrier
       |                              |                               |
-      |--------- INVITE ------------>|                               |
+      |--------- INVITE (100rel) --->|                               |
       |<-------- 100 Trying ---------|                               |
-      |                              |--------- INVITE ------------>|
-      |                              |<-------- 180 Ringing ---------|
-      |<-------- 180 Ringing --------|                               |
-      |                              |<-------- 200 OK --------------|
-      |<-------- 200 OK -------------|                               |
+      |                              |--------- INVITE ------------->|
+      |                              |<-------- 183 Session Progress |
+      |<-------- 183 (RSeq: 101) ----|                               |
+      |--------- PRACK (RAck: 101) ->|                               |
+      |                              |--------- PRACK -------------->|
+      |                              |<-------- 200 OK (PRACK) ------|
+      |<-------- 200 OK (PRACK) -----|                               |
+      |                              |<-------- 200 OK (INVITE) -----|
+      |<-------- 200 OK (INVITE) ----|                               |
       |--------- ACK --------------->|                               |
       |                              |--------- ACK ---------------->|
-      |========== 2-WAY RTP AUDIO / DTMF STREAM (G.711u) ============|
+      |========== 2-WAY RTP AUDIO / DTMF STREAM (G.711u / Opus) ======|
       |                              |                               |
       |--------- BYE --------------->|                               |
       |                              |--------- BYE ---------------->|
@@ -31,32 +35,18 @@ VoxPulse Softphone              SBC / Proxy                     PSTN Carrier
       |<-------- 200 OK -------------|                               |
 ```
 
-### 1.2 Essential SIP Header Specifications
-
+### 1.2 RFC 3515 SIP REFER Call Transfer Call Flow
+VoxPulse supports both **Blind Transfers** and **Attended Transfers** (`Replaces` parameter):
 ```sip
-INVITE sip:+18005550199@sbc1.voxpulse.internal:5060 SIP/2.0
-Via: SIP/2.0/UDP 192.168.1.100:5060;branch=z9hG4bK-vox-987654
-Max-Forwards: 70
-From: "VoxPulse Tester" <sip:+18005550198@voxpulse.internal>;tag=vox-tag-001
-To: <sip:+18005550199@sbc1.voxpulse.internal>
-Call-ID: call-uuid-889900-1122-3344@192.168.1.100
-CSeq: 1 INVITE
-Contact: <sip:voxpulse@192.168.1.100:5060>
-Supported: 100rel, timer, replaces
-Identity: eyJhbGciOiJFUzI1NiIsInR5cCI6InBhc3Nwb3J0In0...;info=<https://cert.voxpulse.net/cert.pem>;alg=ES256;ppt=shaken
-Content-Type: application/sdp
-Content-Length: 242
-
-v=0
-o=VoxPulse 1704067200 1704067200 IN IP4 192.168.1.100
-s=VoxPulse PSTN Stream
-c=IN IP4 192.168.1.100
-t=0 0
-m=audio 10004 RTP/AVP 0 101
-a=rtpmap:0 PCMU/8000
-a=rtpmap:101 telephone-event/8000
-a=fmtp:101 0-16
-a=sendrecv
+REFER sip:caller@voxpulse.internal SIP/2.0
+Via: SIP/2.0/UDP 10.0.0.1:5060;branch=z9hG4bK-refer-101
+To: <sip:caller@voxpulse.internal>;tag=caller-tag-01
+From: <sip:ivr@voxpulse.internal>;tag=ivr-tag-02
+Call-ID: call-882910-xyz
+CSeq: 201 REFER
+Refer-To: <sip:agent301@pbx.corp.net?Replaces=callid-992%3Bto-tag%3D123>
+Referred-By: <sip:ivr@voxpulse.internal>
+Content-Length: 0
 ```
 
 ---
@@ -74,27 +64,27 @@ In-band DTMF events are transmitted via RTP payload type `101` (`telephone-event
 ```
 
 ### Event Codes Map:
-- `0-9`: Digits `0` through `9`
+- `0–9`: Digits `0` through `9`
 - `10`: `*`
 - `11`: `#`
-- `12-15`: `A`, `B`, `C`, `D`
-- `16`: Flash
+- `12–15`: `A`, `B`, `C`, `D`
+- `16`: Flash Hook
 
 ---
 
-## 3. STIR/SHAKEN Attestation & Identity Tokens
+## 3. STIR/SHAKEN Attestation & PASSporT Cryptographic Tokens
 
-To prevent caller ID spoofing and ensure high call completion rates across North American PSTN networks, VoxPulse AI signs outbound SIP requests using STIR/SHAKEN PASSporT tokens.
+To prevent caller ID spoofing and ensure high call completion rates, VoxPulse AI verifies and generates RFC 8224 / RFC 8588 STIR/SHAKEN PASSporT tokens.
 
-### 3.1 Attestation Level Classification
+### 3.1 Attestation Levels
 
-| Level | Name | Requirement | Carrier Handling |
+| Level | Classification | Ownership Verification | Call Delivery Result |
 | :---: | :--- | :--- | :--- |
-| **A** | **Full Attestation** | Originator is fully authenticated and owns the calling number. | Delivered cleanly without spam warning. |
-| **B** | **Partial Attestation** | Originator is authenticated, but number ownership is unverified. | Allowed; may flag conditionally. |
-| **C** | **Gateway Attestation** | Call originated from an unauthenticated PSTN gateway. | High risk of being marked as **"Spam Likely"**. |
+| **A** | **Full Attestation** | Caller is authenticated and authorized to use the TN. | Clean display, green checkmark on mobile handsets. |
+| **B** | **Partial Attestation** | Caller is authenticated; TN ownership is unverified. | Normal delivery, no spam badge. |
+| **C** | **Gateway Attestation** | Origin is unverified (international / untrusted gateway). | High risk of **"Fraud Alert"** or **"Spam Likely"**. |
 
-### 3.2 PASSporT JWT Header & Claims
+### 3.2 PASSporT Header & Payload Format
 ```json
 {
   "alg": "ES256",
@@ -107,7 +97,7 @@ To prevent caller ID spoofing and ensure high call completion rates across North
   "dest": { "tn": ["+18005550199"] },
   "iat": 1704067200,
   "orig": { "tn": "+18005550198" },
-  "origid": "vox-orig-uuid-12345"
+  "origid": "urn:uuid:vox-orig-uuid-12345"
 }
 ```
 
@@ -115,27 +105,30 @@ To prevent caller ID spoofing and ensure high call completion rates across North
 
 ## 4. E911 Emergency Compliance (Kari's Law & RAY BAUM'S Act)
 
-VoxPulse AI includes automated E911 address validation and emergency call path testing ([`src/components/EmergencyE911AddressValidator.jsx`](file:///Users/atreyayelishetti/Desktop/work/ivr%20testing/src/components/EmergencyE911AddressValidator.jsx)).
+Enforced via [`EmergencyE911AddressValidator.jsx`](file:///Users/atreyayelishetti/Desktop/work/ivr%20testing/src/components/EmergencyE911AddressValidator.jsx):
+1. **Direct 911 Dialing (Kari's Law)**: Zero dial prefix requirement.
+2. **On-Site Notification**: Instant emergency broadcast to facility security personnel.
+3. **Dispatchable Location (RAY BAUM'S Act)**: Validates street, building, floor, and suite/room PIDF-LO XML.
 
-### Compliance Requirements Enforced:
-1. **Direct 911 Dialing (Kari's Law)**: No prefix (e.g. `9` or `8`) required to reach 911.
-2. **On-Site Notification**: Instant WebSocket broadcast and SMS alert sent to security officers whenever 911 is dialed.
-3. **Dispatchable Location (RAY BAUM'S Act)**: Validates street address, building number, floor level, and room number sent via PIDF-LO XML in SIP body.
+---
 
-```xml
-<presence xmlns="urn:ietf:params:xml:ns:pidf" entity="pres:911@voxpulse.internal">
-  <tuple id="loc1">
-    <status><geopriv xmlns="urn:ietf:params:xml:ns:pidf:geopriv10">
-      <location-info><civicAddress xmlns="urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr">
-        <country>US</country>
-        <A1>NY</A1>
-        <A3>New York</A3>
-        <RD>Broadway</RD>
-        <HNO>500</HNO>
-        <FL>12</FL>
-        <ROOM>1204</ROOM>
-      </civicAddress></location-info>
-    </geopriv></status>
-  </tuple>
-</presence>
-```
+## 5. ITU-T G.168 Acoustic Echo Cancellation (AEC)
+
+Acoustic reflection attenuation thresholds:
+- **Echo Return Loss (ERL)**: $\ge 14\text{ dB}$ (physical handset coupling loss).
+- **Echo Return Loss Enhancement (ERLE)**: $\ge 30\text{ dB}$ (active DSP filter cancellation).
+- **Acoustic Combined Loss (ACOM)**: $\text{ACOM} = \text{ERL} + \text{ERLE} \ge 44\text{ dB}$.
+- **Convergence Time**: $< 250\text{ ms}$ to suppress echo talkspurt.
+
+---
+
+## 6. WebRTC RFC 8445 ICE Candidate Priority Calculation
+
+Candidate priority formula:
+$$\text{Priority} = (2^{24} \cdot \text{type\_pref}) + (2^8 \cdot \text{local\_pref}) + (256 - \text{component})$$
+- `host` type preference: $126$
+- `srflx` (STUN reflexive) type preference: $100$
+- `relay` (TURN relay) type preference: $0$
+
+---
+*VoxPulse AI Telecom Protocol Specification • RFC 3261, 3262, 3515, 4733, 8445 Verified*

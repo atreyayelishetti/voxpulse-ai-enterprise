@@ -1,18 +1,18 @@
-# 📂 VoxPulse AI - 104 UI Module Directory & API Catalog
+# 📂 VoxPulse AI - 107 UI Module Directory & API Catalog
 > **Document Version:** 1.0.0-enterprise  
 > **Classification:** Component Sitemap & API Specification  
 > **Target Audience:** Frontend Engineers, QA Leads, System Administrators  
 
 ---
 
-## 1. Directory Catalog (104 Enterprise Components)
+## 1. Directory Catalog (107 Enterprise Components)
 
-Below is the complete catalog of all 104 components in `src/components/`:
+Below is the complete catalog of all 107 components in `src/components/`:
 
 | Module # | Component File Name | Component ID | Purpose |
 | :---: | :--- | :--- | :--- |
 | **1** | [`LoginScreen.jsx`](file:///Users/atreyayelishetti/Desktop/work/ivr%20testing/src/components/LoginScreen.jsx) | `login` | Keycloak OIDC SSO login modal (`admin` / `password`) |
-| **2** | [`Sidebar.jsx`](file:///Users/atreyayelishetti/Desktop/work/ivr%20testing/src/components/Sidebar.jsx) | `sidebar` | 104-tab glassmorphic navigation sidebar |
+| **2** | [`Sidebar.jsx`](file:///Users/atreyayelishetti/Desktop/work/ivr%20testing/src/components/Sidebar.jsx) | `sidebar` | 107-component glassmorphic navigation sidebar |
 | **3** | [`LiveCallConsole.jsx`](file:///Users/atreyayelishetti/Desktop/work/ivr%20testing/src/components/LiveCallConsole.jsx) | `console` | Live softphone & real-time audio waveform stream |
 | **4** | [`WebRTCSoftphone.jsx`](file:///Users/atreyayelishetti/Desktop/work/ivr%20testing/src/components/WebRTCSoftphone.jsx) | `softphone` | Browser mic WebRTC softphone dialer |
 | **5** | [`VoicebotStudio.jsx`](file:///Users/atreyayelishetti/Desktop/work/ivr%20testing/src/components/VoicebotStudio.jsx) | `voicebot` | Voicebot AI NLU studio (Dialogflow & Gemini) |
@@ -115,3 +115,87 @@ Below is the complete catalog of all 104 components in `src/components/`:
 | **102** | [`TelecomRegulatorySTIRSHAKEN.jsx`](file:///Users/atreyayelishetti/Desktop/work/ivr%20testing/src/components/TelecomRegulatorySTIRSHAKEN.jsx) | `stirshaken` | STIR/SHAKEN Attestation token inspector |
 | **103** | [`EnterpriseRBACPermissionMatrix.jsx`](file:///Users/atreyayelishetti/Desktop/work/ivr%20testing/src/components/EnterpriseRBACPermissionMatrix.jsx) | `permmatrix` | RBAC permission matrix inspector |
 | **104** | [`KlearcomExecutiveDashboard.jsx`](file:///Users/atreyayelishetti/Desktop/work/ivr%20testing/src/components/KlearcomExecutiveDashboard.jsx) | `dashboard100` | Executive summary dashboard |
+| **105** | [`KlearcomROI.jsx`](file:///Users/atreyayelishetti/Desktop/work/ivr%20testing/src/components/KlearcomROI.jsx) | `klearcom` | Klearcom enterprise replacement ROI & TCO cost savings calculator |
+| **106** | [`AnalyticsReports.jsx`](file:///Users/atreyayelishetti/Desktop/work/ivr%20testing/src/components/AnalyticsReports.jsx) | `analytics` | Call analytics reports & audio session inspector |
+| **107** | [`AudioWaveformPlayer.jsx`](file:///Users/atreyayelishetti/Desktop/work/ivr%20testing/src/components/AudioWaveformPlayer.jsx) | `waveform` | Real-time Canvas 60 FPS audio waveform visualizer & playback engine |
+
+---
+
+## 2. Complete Backend REST API Catalog (27 Endpoints)
+
+VoxPulse AI exposes 27 enterprise-grade REST endpoints serving real-time telephony, PSTN calculation engines, AI NLU models, audio DSP processing, carrier intelligence, and compliance verification. All 18 calculation endpoints are continuously verified by the automated E2E test harness (`npm run test:e2e`).
+
+### 2.1 Core Telephony, Call Control & Load Testing
+
+| HTTP Method | Route | Description | Request Payload / Params | Response Format |
+| :--- | :--- | :--- | :--- | :--- |
+| `POST` | `/api/calls/initiate` | Dispatches outbound synthetic PSTN call via Telnyx/Twilio SIP trunk | `targetPhoneNumber`, `originatingCountry`, `provider` | `200 OK` JSON with `callState` |
+| `POST` | `/api/ivr/discover` | Crawls & auto-discovers hierarchical IVR menu trees autonomously | `targetNumber`, `countryCode` | `200 OK` JSON with graph AST |
+| `POST` | `/api/loadtest` | Standard concurrency load testing across phone targets | `concurrencyCount`, `targetNumber` | `200 OK` JSON with latency & MOS |
+| `POST` | `/api/loadtest/start` | High-volume concurrent PSTN stress runner using test engine | `concurrencyCount`, `targetNumber`, `country` | `200 OK` JSON with concurrency stats |
+| `POST` | `/api/tests/run` | Initiates single or batch automated synthetic test scenario | Full test case definition object | `200 OK` JSON with run ID |
+| `GET` | `/api/tests/history` | Returns historical test execution runs, pass rates & duration | None | `200 OK` JSON with history array |
+
+### 2.2 SIP Signaling, Protocols & Cryptography
+
+| HTTP Method | Route | Description | Request Payload / Params | Response Format |
+| :--- | :--- | :--- | :--- | :--- |
+| `POST` | `/api/sip/generate` | Generates RFC 3261 SIP messages & RFC 4566 SDP offer/answer bodies | `method`, `toUri`, `fromUri`, `includeSDP` | `200 OK` JSON with `rawMessage`, `callId`, `cseq` |
+| `POST` | `/api/sip/parse` | Parses raw RFC 3261 SIP headers and multi-part MIME/SDP into AST | `rawSip` string | `200 OK` JSON with parsed headers & SDP |
+| `POST` | `/api/stirshaken/verify` | STIR/SHAKEN PASSporT cryptographic token & X.509 cert validator | `callerId`, `targetNumber`, `attestation` | `200 OK` JSON with PASSporT payload & cert validity |
+| `GET` | `/api/dtmf/wav` | Synthesizes 8kHz single-channel WAV dual-tone multi-frequency audio | `digit` (0-9, *, #), `duration` (ms) | `200 OK` `audio/wav` binary stream |
+
+### 2.3 Audio Quality, Processing & DSP
+
+| HTTP Method | Route | Description | Request Payload / Params | Response Format |
+| :--- | :--- | :--- | :--- | :--- |
+| `POST` | `/api/lufs/normalize` | EBU R128 integrated loudness & true-peak normalization engine | `targetLUFS`, `truePeakLimit`, `promptName` | `200 OK` JSON with `appliedGainDb`, `compliantEBU_R128` |
+| `POST` | `/api/audio/degrade` | Simulates network packet loss, jitter buffer delay & codec transcoding | `packetLoss`, `jitter`, `codec`, `noiseProfile` | `200 OK` JSON with `polqa`, `mos`, `wer`, `snr` |
+
+### 2.4 AI, NLU & Voicebot Studio
+
+| HTTP Method | Route | Description | Request Payload / Params | Response Format |
+| :--- | :--- | :--- | :--- | :--- |
+| `POST` | `/api/gemini/analyze` | Evaluates IVR prompt intent, sentiment & drop-off via Gemini 2.5 Flash | `promptTranscript`, `currentStep`, `expectedPrompt` | `200 OK` JSON with Gemini intent & RCA |
+| `POST` | `/api/gemini/translate` | Multilingual prompt translation & accuracy verification | `promptTranscript`, `sourceLanguage` | `200 OK` JSON with translation & BLEU score |
+| `POST` | `/api/voicebot/bargein` | VAD interrupt sensitivity benchmark & audio cutoff latency measurement | `promptDurationMs`, `interruptAtMs`, `vadSensitivity` | `200 OK` JSON with `totalBargeInLatencyMs`, `slaMet` |
+
+### 2.5 Telecom Routing, Capacity & Carrier Intelligence
+
+| HTTP Method | Route | Description | Request Payload / Params | Response Format |
+| :--- | :--- | :--- | :--- | :--- |
+| `POST` | `/api/telecom/lcr` | Least Cost Routing (LCR) engine & vendor markup savings calculator | `targetNumber`, `country`, `minMOS`, `volumeMinutes` | `200 OK` JSON with best carrier route & savings |
+| `POST` | `/api/erlang/calculate` | Erlang C contact center queue delay probability & staffing math | `callsPerHour`, `ahtSeconds`, `targetAnswerSeconds`, `agents` | `200 OK` JSON with `serviceLevelPercent`, `recommendedAgents` |
+| `GET` | `/api/lrn/lookup` | Local Routing Number (LRN) & ported carrier OCN database lookup | `number` (+E.164 query string) | `200 OK` JSON with `lrn`, `currentCarrier`, `isPorted` |
+| `GET` | `/api/probes/status` | Real-time health & latency telemetry from 12 global POP probe nodes | None | `200 OK` JSON with global POP status list |
+
+### 2.6 Enterprise Administration, Compliance & Reporting
+
+| HTTP Method | Route | Description | Request Payload / Params | Response Format |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/api/config` | Platform environment configuration, active providers & AI status | None | `200 OK` JSON with system configuration |
+| `POST` | `/api/auth/login` | Keycloak OIDC SSO authentication endpoint | `username`, `password`, `realm` | `200 OK` JSON with JWT Bearer token & user profile |
+| `GET` | `/api/dashboard/stats` | High-level executive statistics (total runs, MOS, SLA, uptime) | None | `200 OK` JSON with global stats |
+| `GET` | `/api/alerts` | Active telecom incidents, carrier outages & threshold triggers | None | `200 OK` JSON with incident array |
+| `GET` | `/api/reports/html` | Generates standalone executive SLA HTML report with inline charts | None | `200 OK` `text/html` document |
+| `GET` | `/api/metrics` | Prometheus format metric counter export for Datadog / Grafana | None | `200 OK` `text/plain` Prometheus metrics |
+| `POST` | `/api/webhooks/dispatch` | HMAC-SHA256 signed webhook dispatch engine with retry simulation | `endpoint`, `event`, `payload`, `secret` | `200 OK` JSON with `signatureHeader`, `dispatchId` |
+| `POST` | `/api/compliance/audit` | Regulatory compliance audit engine (PCI-DSS, HIPAA, GDPR, TCPA) | `framework` ('ALL' or specific) | `200 OK` JSON with `cryptographicHash`, `overallScore` |
+
+---
+
+## 3. End-to-End Regression Verification
+
+The platform includes an automated regression harness that tests all calculation and signaling endpoints against their mathematical constraints:
+
+```bash
+# Execute the complete 18-endpoint regression harness
+npm run test:e2e
+```
+
+**Verification Guarantees:**
+1. **PSTN Concurrency:** `POST /api/loadtest/start` launches synchronous test runner calls across multiple simulated PSTN lines.
+2. **Deterministic Cryptography:** `POST /api/webhooks/dispatch` and `POST /api/compliance/audit` verify HMAC-SHA256 signatures and SHA256 audit log integrity.
+3. **Signaling Compliance:** `POST /api/sip/generate` and `POST /api/sip/parse` strictly validate RFC 3261 header formatting and RFC 4566 SDP descriptions.
+4. **Queue & DSP Exactness:** `POST /api/erlang/calculate` and `POST /api/lufs/normalize` execute exact mathematical formulas without approximation errors.
+

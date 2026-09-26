@@ -42,7 +42,7 @@ ivr testing/
 ├── HANDOFF_DOCUMENTATION.md            # This handoff documentation
 │
 ├── server/                             # Node Express Backend & Telephony Core
-│   ├── index.js                        # Primary REST API routes & WebSocket server (18 endpoints)
+│   ├── index.js                        # Primary REST API routes & WebSocket server (27 endpoints, 18 calculation engines)
 │   ├── telephonyAdapter.js             # Telephony abstraction (Telnyx, Twilio, CCAI, Simulator)
 │   ├── geminiEngine.js                 # Gemini 2.5/3.8 Flash prompt analysis & RCA engine
 │   ├── dtmfGenerator.js                # Web Audio 8000Hz PCM G.711u DTMF tone synthesizer
@@ -78,7 +78,7 @@ ivr testing/
     │
     └── components/                     # 107 Enterprise UI Module Components
         ├── LoginScreen.jsx             # Keycloak OIDC SSO login modal (`admin` / `password`)
-        ├── Sidebar.jsx                 # 107-tab glassmorphic navigation sidebar
+        ├── Sidebar.jsx                 # 107-component glassmorphic navigation sidebar
         ├── LiveCallConsole.jsx         # Live interactive softphone & audio spectrum
         ├── WebRTCSoftphone.jsx         # Browser mic softphone dialer
         ├── VoicebotStudio.jsx          # Voicebot AI NLU studio
