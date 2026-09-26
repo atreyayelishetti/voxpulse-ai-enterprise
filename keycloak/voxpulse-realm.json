@@ -1,0 +1,46 @@
+{
+  "realm": "voxpulse-realm",
+  "enabled": true,
+  "registrationAllowed": true,
+  "clients": [
+    {
+      "clientId": "voxpulse-app",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": [
+        "http://localhost:5173/*",
+        "http://localhost:8080/*",
+        "http://localhost/*"
+      ]
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "admin",
+        "description": "Full access to IVR test suites, DIDs, and Keycloak user management"
+      },
+      {
+        "name": "qa_engineer",
+        "description": "Can build and execute IVR tests and view reports"
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@voxpulse.internal",
+      "firstName": "VoxPulse",
+      "lastName": "Admin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123"
+        }
+      ],
+      "realmRoles": ["admin"]
+    }
+  ]
+}

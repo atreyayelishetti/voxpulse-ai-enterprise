@@ -1,0 +1,66 @@
+name: VoxPulse IVR Automated Regression & Reachability Pipeline
+
+on:
+  push:
+    branches: [ main, master, release/* ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 * * * *' # Hourly automated reachability check
+
+jobs:
+  ivr-regression-test:
+    name: Execute Global IVR Test Suites
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: voxpulse
+          POSTGRES_PASSWORD: voxpulse123
+          POSTGRES_DB: voxpulse_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Project Dependencies
+        run: npm ci
+
+      - name: Build Application Artifacts
+        run: npm run build
+
+      - name: Start VoxPulse Backend Engine
+        env:
+          PORT: 3001
+          DATABASE_URL: postgresql://voxpulse:voxpulse123@localhost:5432/voxpulse_db
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+        run: |
+          node server/index.js &
+          sleep 3
+
+      - name: Run IVR Test Suite Trigger via API
+        run: |
+          curl -f -X POST http://localhost:3001/api/tests/run \
+            -H "Content-Type: application/json" \
+            -d '{"name": "CI/CD Deployment IVR Regression", "targetNumber": "+18005550100", "country": "US"}'
+
+      - name: Verify Audio Quality MOS & SLA Score
+        run: |
+          curl -f http://localhost:3001/api/config

@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: voxpulse_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: voxpulse
+      POSTGRES_PASSWORD: voxpulse123
+      POSTGRES_DB: voxpulse_db
+    ports:
+      - "5439:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./server/db/schema.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U voxpulse -d voxpulse_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Keycloak SSO Server (OAuth2 / OIDC)
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: voxpulse_keycloak
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: dev-mem
+    ports:
+      - "8088:8080"
+    volumes:
+      - ./keycloak/voxpulse-realm.json:/opt/keycloak/data/import/voxpulse-realm.json
+    depends_on:
+      - postgres
+
+  # 3. VoxPulse AI Backend Engine
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: voxpulse_backend
+    restart: always
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgresql://voxpulse:voxpulse123@postgres:5432/voxpulse_db
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: voxpulse-realm
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TELNYX_API_KEY: ${TELNYX_API_KEY:-}
+    ports:
+      - "3002:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 4. VoxPulse AI Frontend Dashboard (Nginx)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: voxpulse_frontend
+    restart: always
+    ports:
+      - "5174:80"
+      - "8090:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
