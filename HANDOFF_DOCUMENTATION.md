@@ -37,9 +37,13 @@
 ```
 ivr testing/
 ├── .env                                # Environment credentials & API keys
+├── .github/workflows/ci.yml            # Automated GitHub Actions CI/CD pipeline
 ├── docker-compose.yml                  # Docker orchestration (Postgres, Keycloak, Backend, Frontend)
 ├── package.json                        # Dependencies & npm script shortcuts
 ├── HANDOFF_DOCUMENTATION.md            # This handoff documentation
+│
+├── bin/
+│   └── voxpulse.js                     # Headless enterprise CLI tool (run, load, erlang, lcr, audit)
 │
 ├── server/                             # Node Express Backend & Telephony Core
 │   ├── index.js                        # Primary REST API routes & WebSocket server (27 endpoints, 18 calculation engines)

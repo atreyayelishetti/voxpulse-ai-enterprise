@@ -3,6 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "bin": {
+    "voxpulse": "./bin/voxpulse.js"
+  },
   "scripts": {
     "dev": "concurrently \"node server/index.js\" \"vite\"",
     "server": "node server/index.js",

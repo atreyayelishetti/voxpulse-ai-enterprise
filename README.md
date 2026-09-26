@@ -85,6 +85,24 @@ npm run test:ux
 npm run build
 ```
 
+### 5. Headless CLI Tool (`voxpulse`)
+```bash
+# Display help and available CLI commands
+./bin/voxpulse.js --help
+
+# Run an automated PSTN IVR test scenario from terminal
+./bin/voxpulse.js run --target "+18005550100" --carrier simulator
+
+# Execute concurrent PSTN stress testing with JSON output
+./bin/voxpulse.js load --concurrency 5 --target "+18005550199" --json
+
+# Run Erlang C queue capacity calculations
+./bin/voxpulse.js erlang --calls 600 --aht 180 --agents 35
+
+# Execute regulatory compliance audit (PCI, HIPAA, GDPR)
+./bin/voxpulse.js audit --framework ALL --json
+```
+
 ---
 
 ## 📊 Automated Test Coverage Matrix (1,500 Test Cases)

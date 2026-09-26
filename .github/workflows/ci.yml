@@ -1,0 +1,62 @@
+name: VoxPulse AI Enterprise CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build, Audit & Automated Test Verification
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: 📦 Install NPM Dependencies
+        run: npm install
+
+      - name: 🔍 Static Code Analysis (Oxlint)
+        run: npm run lint
+
+      - name: 🏗️ Vite Production Build
+        run: npm run build
+
+      - name: 🧪 Execute 1,500 Automated Test Cases (Groups 1-30)
+        run: npm run test:1500
+
+      - name: 🖱️ Validate UX Clicks & Platform Functions (107 UI Modules)
+        run: npm run test:ux
+
+      - name: 🌐 Execute End-to-End REST Integration Suite (18 Endpoints)
+        run: npm run test:e2e
+
+      - name: 🗄️ Validate PostgreSQL Database Seed & Schema (15 Tables)
+        run: npm run db:seed
+
+      - name: 🐳 Validate Docker Compose Configuration
+        run: docker compose config
+
+      - name: 📊 Pipeline Test Summary
+        if: always()
+        run: |
+          echo "======================================================="
+          echo "✅ VoxPulse AI Enterprise CI/CD Verification Completed"
+          echo "======================================================="
