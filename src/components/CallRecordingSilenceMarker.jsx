@@ -50,6 +50,41 @@ export default function CallRecordingSilenceMarker() {
         </div>
       </div>
 
+      {/* Controls & Thresholds */}
+      <div className="glass-card" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button 
+            className="btn btn-primary"
+            onClick={() => setIsPlaying(!isPlaying)}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+            {isPlaying ? 'Pause Audio Analysis' : 'Play & Scan Session'}
+          </button>
+          <span style={{ fontSize: '0.85rem', color: isPlaying ? '#10b981' : 'var(--text-muted)' }}>
+            {isPlaying ? '▶ Acoustic scanner active (60 FPS)' : '⏸ Playback paused'}
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Sliders size={16} color="#06b6d4" /> Silence Floor Threshold:
+          </label>
+          <input 
+            type="range" 
+            min="-60" 
+            max="-30" 
+            step="1"
+            value={silenceThresholdDb} 
+            onChange={(e) => setSilenceThresholdDb(Number(e.target.value))}
+            style={{ accentColor: '#06b6d4', width: '120px' }}
+          />
+          <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#06b6d4', minWidth: '60px' }}>
+            {silenceThresholdDb} dBFS
+          </span>
+        </div>
+      </div>
+
       {/* Waveform Timeline Visualizer with Red Highlighted Silence Bars */}
       <div className="glass-card" style={{ padding: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>

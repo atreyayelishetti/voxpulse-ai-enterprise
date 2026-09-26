@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, ShieldCheck, Activity, Globe, TrendingUp, CheckCircle2, Award, Zap } from 'lucide-react';
+import { DollarSign, ShieldCheck, Activity, Globe, TrendingUp, CheckCircle2, Award, Zap, RefreshCw, Download } from 'lucide-react';
 
 export default function KlearcomExecutiveDashboard() {
+  const [timeframe, setTimeframe] = useState('30D');
   const [stats, setStats] = useState({
     totalTestRuns: 28419,
     passRate: 99.94,
@@ -14,11 +15,15 @@ export default function KlearcomExecutiveDashboard() {
     uptimeSlaCurrentMonth: '99.995%'
   });
 
-  useEffect(() => {
+  const refreshStats = () => {
     fetch('/api/dashboard/stats')
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(() => {});
+  };
+
+  useEffect(() => {
+    refreshStats();
   }, []);
 
   return (
@@ -32,9 +37,28 @@ export default function KlearcomExecutiveDashboard() {
             Executive telemetry overview. Tracks global telephony availability, direct carrier egress savings, and acoustic MOS benchmarks.
           </p>
         </div>
-        <span className="badge badge-emerald" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <ShieldCheck size={14} /> Full Vendor Replacement Active
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {['30D', '90D', 'YTD'].map(tf => (
+            <button
+              key={tf}
+              className={`btn ${timeframe === tf ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+              onClick={() => setTimeframe(tf)}
+            >
+              {tf}
+            </button>
+          ))}
+          <button 
+            className="btn btn-secondary" 
+            style={{ padding: '6px 12px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+            onClick={refreshStats}
+          >
+            <RefreshCw size={14} /> Refresh
+          </button>
+          <span className="badge badge-emerald" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <ShieldCheck size={14} /> Full Vendor Replacement Active
+          </span>
+        </div>
       </div>
 
       {/* Top Level Financial & Reliability KPIs */}

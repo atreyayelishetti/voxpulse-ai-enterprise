@@ -16,6 +16,7 @@
     "test:600": "node server/tests/comprehensive1500TestSuite.js",
     "test:1000": "node server/tests/comprehensive1500TestSuite.js",
     "test:1500": "node server/tests/comprehensive1500TestSuite.js",
+    "test:ux": "node server/tests/comprehensiveUXAndFunctionsValidator.js",
     "db:seed": "node server/db/seed.js"
   },
   "dependencies": {

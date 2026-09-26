@@ -32,6 +32,9 @@ npm run test
 # Execute Autonomous 18-Endpoint REST E2E Integration Suite
 npm run test:e2e
 
+# Execute Comprehensive UX Clicks & Platform Functions Validation Suite
+npm run test:ux
+
 # Production Build Verification
 npm run build
 

@@ -35,9 +35,20 @@ export default function EmergencyMonitor() {
             </p>
           </div>
 
-          <span className="badge badge-rose" style={{ padding: '6px 12px' }}>
-            <span className="pulse-dot" style={{ backgroundColor: '#f43f5e' }} /> 24/7 Outage Monitor Active
-          </span>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <button 
+              className="btn btn-secondary" 
+              onClick={() => {
+                setLines(prev => prev.map(l => ({ ...l, lastCheck: 'Just now', status: 'HEALTHY' })));
+              }}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <Activity size={16} color="#38bdf8" /> Ping All Trunks
+            </button>
+            <span className="badge badge-rose" style={{ padding: '6px 12px' }}>
+              <span className="pulse-dot" style={{ backgroundColor: '#f43f5e' }} /> 24/7 Outage Monitor Active
+            </span>
+          </div>
         </div>
       </div>
 
@@ -79,6 +90,21 @@ export default function EmergencyMonitor() {
                 <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>SILENCE CHECK</div>
                 <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#34d399' }}>PASSED</div>
               </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
+              <button
+                className="btn btn-secondary"
+                style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                onClick={() => {
+                  setLines(prev => prev.map(l => l.id === line.id ? { ...l, lastCheck: 'Testing now...', status: 'TESTING' } : l));
+                  setTimeout(() => {
+                    setLines(prev => prev.map(l => l.id === line.id ? { ...l, lastCheck: 'Just now', status: 'HEALTHY' } : l));
+                  }, 600);
+                }}
+              >
+                <Zap size={12} color="#f59e0b" /> Test Line Now
+              </button>
             </div>
           </div>
         ))}

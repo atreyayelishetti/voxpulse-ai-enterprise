@@ -66,6 +66,7 @@ ivr testing/
 │       ├── comprehensive1000TestSuite.js# Wrapper running comprehensive 1,500 tests
 │       ├── comprehensive600TestSuite.js # Backward-compatible 600 runner
 │       ├── comprehensive300TestSuite.js # 300 test cases
+│       ├── comprehensiveUXAndFunctionsValidator.js # UX clicks & platform functions validator (npm run test:ux)
 │       └── e2eTestSuite.js             # Autonomous end-to-end integration tests (18 endpoints)
 │
 ├── keycloak/

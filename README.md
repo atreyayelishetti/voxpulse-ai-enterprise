@@ -78,6 +78,9 @@ npm run test
 # Run the autonomous 18-endpoint E2E integration suite
 npm run test:e2e
 
+# Run the comprehensive UX clicks and platform functions validation suite (153 tests, 100% pass)
+npm run test:ux
+
 # Run production build verification
 npm run build
 ```

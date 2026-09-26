@@ -65,16 +65,37 @@ export default function STTConfusionMatrix() {
                 <th style={{ padding: '10px' }}>Telephony Error Rate</th>
                 <th style={{ padding: '10px' }}>Acoustic / Telecom Root Cause</th>
                 <th style={{ padding: '10px' }}>Remediation Recommendation</th>
+                <th style={{ padding: '10px' }}>Action</th>
               </tr>
             </thead>
             <tbody>
               {confusionPairs.map((p, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                <tr 
+                  key={i} 
+                  style={{ 
+                    borderBottom: '1px solid rgba(255,255,255,0.04)',
+                    background: selectedPair?.target === p.target ? 'rgba(6, 182, 212, 0.08)' : 'transparent',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => setSelectedPair(selectedPair?.target === p.target ? null : p)}
+                >
                   <td style={{ padding: '12px 10px', fontWeight: 700, color: '#fff' }}>{p.target}</td>
                   <td style={{ padding: '12px 10px', color: '#f43f5e', fontWeight: 600 }}>{p.recognized}</td>
                   <td style={{ padding: '12px 10px', color: '#f59e0b', fontWeight: 700 }}>{p.errorRate}</td>
                   <td style={{ padding: '12px 10px', color: '#94a3b8' }}>{p.reason}</td>
                   <td style={{ padding: '12px 10px', color: '#10b981', fontWeight: 600 }}>{p.recommendation}</td>
+                  <td style={{ padding: '12px 10px' }}>
+                    <button
+                      className="btn btn-secondary"
+                      style={{ fontSize: '0.75rem', padding: '4px 8px' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedPair(p);
+                      }}
+                    >
+                      {selectedPair?.target === p.target ? '✓ Biased' : 'Boost Phrase'}
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

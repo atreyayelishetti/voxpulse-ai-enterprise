@@ -17,10 +17,6 @@ export default function AnalyticsReports() {
   const [history, setHistory] = useState([]);
   const [selectedRun, setSelectedRun] = useState(null);
 
-  useEffect(() => {
-    fetchHistory();
-  }, []);
-
   const fetchHistory = async () => {
     try {
       const res = await fetch('/api/tests/history');
@@ -34,6 +30,10 @@ export default function AnalyticsReports() {
       setHistory(mockHistory());
     }
   };
+
+  useEffect(() => {
+    fetchHistory();
+  }, []);
 
   const handleDownloadReport = (run) => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(run, null, 2));

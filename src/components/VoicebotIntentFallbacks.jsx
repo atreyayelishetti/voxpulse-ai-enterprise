@@ -50,9 +50,27 @@ export default function VoicebotIntentFallbacks() {
 
       {/* Fallback Tiers Chain */}
       <div className="glass-card" style={{ padding: '24px' }}>
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', marginBottom: '20px' }}>
-          Escalation Strategy Ladder
-        </h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff' }}>
+            Escalation Strategy Ladder
+          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button 
+              className="btn btn-primary"
+              style={{ fontSize: '0.82rem', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+              onClick={() => setSimulatedAttempt(prev => prev >= 3 ? 1 : prev + 1)}
+            >
+              <RefreshCcw size={14} /> Simulate Next Fallback Tier (Currently: Tier {simulatedAttempt})
+            </button>
+            <button 
+              className="btn btn-secondary"
+              style={{ fontSize: '0.82rem', padding: '6px 12px' }}
+              onClick={() => setSimulatedAttempt(1)}
+            >
+              Reset
+            </button>
+          </div>
+        </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {fallbackTiers.map((tier) => (
@@ -61,12 +79,13 @@ export default function VoicebotIntentFallbacks() {
               style={{ 
                 padding: '20px', 
                 borderRadius: '8px', 
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid var(--border-color)',
+                background: simulatedAttempt === tier.tier ? 'rgba(6, 182, 212, 0.12)' : 'rgba(255,255,255,0.02)',
+                border: simulatedAttempt === tier.tier ? '1px solid #06b6d4' : '1px solid var(--border-color)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                gap: '16px'
+                gap: '16px',
+                transition: 'all 0.2s ease'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>

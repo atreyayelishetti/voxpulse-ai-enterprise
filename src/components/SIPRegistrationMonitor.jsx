@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserCheck, ShieldCheck, RefreshCw, Server, Wifi, AlertTriangle } from 'lucide-react';
+import { UserCheck, ShieldCheck, RefreshCw, Server, Wifi, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 export default function SIPRegistrationMonitor() {
   const [registrations, setRegistrations] = useState([
