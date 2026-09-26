@@ -147,4 +147,39 @@ graph TD
 - **Failover Verification**: Validated in Group 9 of the test suite (`50 SBC Trunk Failover Tests PASSED`).
 
 ---
-*VoxPulse AI Deployment Playbook • Docker Compose, Prometheus & CI/CD Tested*
+
+## 5. Google Cloud Run Serverless Architecture
+
+VoxPulse AI is deployed to **Google Cloud Platform (GCP)** using Google Cloud Run for public demos and low-maintenance multi-region hosting:
+
+### Live Public Instance:
+- **Production URL**: [https://voxpulse-ai-752915092336.us-central1.run.app](https://voxpulse-ai-752915092336.us-central1.run.app)
+- **GCP Project**: `voxpulse-ai-enterprise` (Project Number: `752915092336`)
+- **Service Name**: `voxpulse-ai`
+- **Region**: `us-central1`
+
+### Key Operational Characteristics:
+1. **Zero-Idle Cost**: Automatically scales between `0` and `5` instances. When there is no active traffic or demo, instances scale down to 0, resulting in zero monthly hosting costs.
+2. **Automated TLS & Custom Domains**: Managed HTTPS/2 certificate issued and auto-renewed by Google Frontend.
+3. **WebSocket Session Affinity**: Configured with `--session-affinity` so persistent telemetry and WebRTC softphone signaling remain locked to the active container replica.
+4. **Unified Multi-Stage Dockerfile**: Builds Vite React frontend in Stage 1, copies optimized static assets to Stage 2 Node 20 runtime, and serves static SPA assets alongside all 27 REST endpoints from a single `$PORT` (8080).
+
+### Deploying Updates:
+```bash
+gcloud run deploy voxpulse-ai \
+  --source . \
+  --project voxpulse-ai-enterprise \
+  --region us-central1 \
+  --platform managed \
+  --allow-unauthenticated \
+  --session-affinity \
+  --memory 1Gi \
+  --cpu 1 \
+  --min-instances 0 \
+  --max-instances 5 \
+  --port 8080 \
+  --set-env-vars "NODE_ENV=production,GEMINI_API_KEY=your_gemini_api_key,TELNYX_API_KEY=your_telnyx_api_key"
+```
+
+---
+*VoxPulse AI Deployment Playbook • Docker Compose, Google Cloud Run & CI/CD Tested*

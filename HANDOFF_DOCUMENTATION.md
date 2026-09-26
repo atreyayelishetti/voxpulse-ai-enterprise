@@ -9,13 +9,15 @@
 **VoxPulse AI** is an enterprise-grade, in-house replacement platform for commercial IVR testing vendors such as **Klearcom**, **Cyara**, and **Hammer**. It delivers end-to-end automated PSTN call testing, voicebot NLU verification, POLQA/PESQ audio MOS scoring, global DID reachability monitoring, multi-carrier LCR cost optimization, and regulatory compliance auditing.
 
 ### Key Highlights
+- **Live Production URL on GCP**: Deployed on Google Cloud Run at [**https://voxpulse-ai-752915092336.us-central1.run.app**](https://voxpulse-ai-752915092336.us-central1.run.app) (Serverless, Auto-TLS, WebSocket Session Affinity, $0/mo Idle Scaling).
 - **107 Enterprise UI Modules**: Feature-complete dark glassmorphic interface covering every telecom, DSP audio, SIP signaling, AI, and security diagnostic capability.
 - **1,500 Automated Test Cases**: 100% pass rate across 30 specialized test groups (`npm run test:1500` / `npm run test:1000` / `npm run test:600`).
 - **Autonomous E2E Testing**: Self-spawning test harness verifying all 18 backend REST calculation and telemetry endpoints with 100% pass rate (`npm run test:e2e`).
+- **Comprehensive UX Click & Function Validator**: 153/153 tests asserting every UI click and function (`npm run test:ux`).
 - **Google Gemini 2.5 & 3.8 AI**: Multimodal acoustic prompt parsing, intent detection, and post-call RCA audits.
 - **Multi-Provider Telephony Egress**: Live **Telnyx PSTN**, **Twilio**, **Google Cloud CCAI**, and **PSTN Simulator**.
 - **Keycloak OIDC SSO**: Realm authentication with Bearer JWT tokens (`admin` / `password`).
-- **Docker Ready**: Pre-configured `docker-compose.yml` with PostgreSQL 16, Keycloak 24, Express Backend, and Nginx Frontend.
+- **Docker & Cloud Run Ready**: Pre-configured multi-stage `Dockerfile`, `.dockerignore`, and `docker-compose.yml` with PostgreSQL 16, Keycloak 24, Express Backend, and Nginx.
 
 ---
 
@@ -29,6 +31,43 @@
 | **Authentication** | Keycloak OIDC 2.0 (Port `8088`), Bearer JWT Tokens |
 | **AI Engine** | `@google/genai` SDK (`gemini-2.5-flash`, `gemini-3.8-flash`) |
 | **Telephony Egress** | Telnyx REST Call Control API, Twilio Voice API, Local Simulator |
+| **Cloud Hosting** | Google Cloud Run (Serverless, Auto-TLS, us-central1) |
+
+---
+
+## 🌐 Live Google Cloud Platform (GCP) Deployment
+
+VoxPulse AI is deployed and live on Google Cloud Platform:
+
+| Attribute | Specification |
+| :--- | :--- |
+| **Live Public URL** | [**https://voxpulse-ai-752915092336.us-central1.run.app**](https://voxpulse-ai-752915092336.us-central1.run.app) |
+| **GCP Project ID** | `voxpulse-ai-enterprise` |
+| **GCP Project Number** | `752915092336` |
+| **Cloud Run Service** | `voxpulse-ai` (Revision: `voxpulse-ai-00001-8hq`) |
+| **Region** | `us-central1` |
+| **Runtime Architecture** | Multi-stage Docker container (Vite Build + Node 20 Express) |
+| **Networking & TLS** | Automatic Google Managed TLS Certificate on port 443 |
+| **Session Affinity** | Enabled (`--session-affinity`) for stateful WebSocket connections |
+| **Scaling Policy** | 0 to 5 instances (scales to zero when idle for $0/mo hosting cost) |
+| **Environment Variables** | `NODE_ENV=production`, `PORT=8080`, `GEMINI_API_KEY`, `TELNYX_API_KEY` |
+
+To redeploy updates at any time:
+```bash
+gcloud run deploy voxpulse-ai \
+  --source . \
+  --project voxpulse-ai-enterprise \
+  --region us-central1 \
+  --platform managed \
+  --allow-unauthenticated \
+  --session-affinity \
+  --memory 1Gi \
+  --cpu 1 \
+  --min-instances 0 \
+  --max-instances 5 \
+  --port 8080 \
+  --set-env-vars "NODE_ENV=production,GEMINI_API_KEY=your_gemini_api_key,TELNYX_API_KEY=your_telnyx_api_key"
+```
 
 ---
 

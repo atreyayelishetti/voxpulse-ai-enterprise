@@ -2,12 +2,17 @@
 ### Next-Generation In-House Replacement for Klearcom, Cyara & Hammer Telecom Testing
 
 [![Status](https://img.shields.io/badge/status-production--ready-emerald.svg)](https://github.com/atreyayelishetti/voxpulse-ai-enterprise)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Google%20Cloud%20Run-4285F4.svg)](https://voxpulse-ai-752915092336.us-central1.run.app)
 [![Tests](https://img.shields.io/badge/tests-1%2C500%20passed%20(100%25)-brightgreen.svg)](file:///Users/atreyayelishetti/Desktop/work/ivr%20testing)
 [![E2E Endpoints](https://img.shields.io/badge/REST%20APIs-18%20verified-blue.svg)](file:///Users/atreyayelishetti/Desktop/work/ivr%20testing)
 [![UI Modules](https://img.shields.io/badge/UI%20Modules-107%20active-cyan.svg)](file:///Users/atreyayelishetti/Desktop/work/ivr%20testing)
 [![License](https://img.shields.io/badge/license-Enterprise-indigo.svg)](file:///Users/atreyayelishetti/Desktop/work/ivr%20testing)
 
 ---
+
+### 🌐 Live Production Demo
+> **Public HTTPS URL:** [https://voxpulse-ai-752915092336.us-central1.run.app](https://voxpulse-ai-752915092336.us-central1.run.app)  
+> *Deployed on Google Cloud Run (Serverless, Auto-TLS, WebSocket Session Affinity, $0/mo Idle Scaling).*
 
 ## 📌 Overview
 
@@ -101,6 +106,24 @@ npm run build
 
 # Execute regulatory compliance audit (PCI, HIPAA, GDPR)
 ./bin/voxpulse.js audit --framework ALL --json
+```
+
+### 6. One-Command Google Cloud Run Deployment
+```bash
+# Build multi-stage container and deploy live to Cloud Run
+gcloud run deploy voxpulse-ai \
+  --source . \
+  --project voxpulse-ai-enterprise \
+  --region us-central1 \
+  --platform managed \
+  --allow-unauthenticated \
+  --session-affinity \
+  --memory 1Gi \
+  --cpu 1 \
+  --min-instances 0 \
+  --max-instances 5 \
+  --port 8080 \
+  --set-env-vars "NODE_ENV=production,GEMINI_API_KEY=your_key,TELNYX_API_KEY=your_key"
 ```
 
 ---

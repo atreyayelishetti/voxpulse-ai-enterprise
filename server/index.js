@@ -5,6 +5,9 @@ import { WebSocketServer } from 'ws';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 
 import { generateDTMFWav, calculateAudioQualityMetrics } from './dtmfGenerator.js';
 import { analyzeIVRPrompt, translateAndVerifyIVR, auditCallSession } from './geminiEngine.js';
@@ -584,6 +587,22 @@ app.post('/api/compliance/audit', (req, res) => {
     certification: 'VERIFIED_BY_VOXPULSE_AUTOMATED_COMPLIANCE_DAEMON'
   });
 });
+
+// Production Static Asset Serving & SPA Fallback
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const distPath = path.resolve(__dirname, '../dist');
+
+if (fs.existsSync(distPath)) {
+  console.log(`[Static] Serving frontend static assets from ${distPath}`);
+  app.use(express.static(distPath));
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api')) {
+      return res.sendFile(path.join(distPath, 'index.html'));
+    }
+    next();
+  });
+}
 
 // Start Server & Initialize Database
 server.listen(PORT, async () => {
