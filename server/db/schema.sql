@@ -197,3 +197,91 @@ VALUES
   (2, 'PagerDuty Incident Escalation', 'PAGERDUTY', 'https://events.pagerduty.com/v2/enqueue', true),
   (3, 'ServiceNow ITSM Tickets', 'SERVICENOW', 'https://enterprise.service-now.com/api/now/table/incident', true)
 ON CONFLICT (id) DO NOTHING;
+
+-- 12. Carrier Trunks & SBC Routing Nodes
+CREATE TABLE IF NOT EXISTS carrier_trunks (
+    id SERIAL PRIMARY KEY,
+    carrier_name VARCHAR(100) NOT NULL UNIQUE,
+    region VARCHAR(100) NOT NULL,
+    as_number VARCHAR(50) NOT NULL,
+    sbc_ip VARCHAR(50) NOT NULL,
+    tls_cipher VARCHAR(100) DEFAULT 'TLS_AES_256_GCM_SHA384',
+    p99_sla_ms INTEGER DEFAULT 120,
+    contractual_uptime DECIMAL(5,3) DEFAULT 99.990,
+    measured_uptime DECIMAL(5,3) DEFAULT 99.995,
+    monthly_spend_usd INTEGER DEFAULT 35000,
+    status VARCHAR(50) DEFAULT 'COMPLIANT',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO carrier_trunks (carrier_name, region, as_number, sbc_ip, p99_sla_ms, contractual_uptime, measured_uptime, monthly_spend_usd, status)
+VALUES 
+  ('AT&T Mobility', 'North America', 'AS7018', '198.51.100.10', 115, 99.990, 99.995, 42000, 'COMPLIANT'),
+  ('Verizon Wireless', 'North America', 'AS701', '198.51.100.20', 124, 99.980, 99.982, 38000, 'COMPLIANT'),
+  ('Lumen / Level 3', 'North America', 'AS3356', '203.0.113.15', 165, 99.950, 99.890, 29000, 'BREACH'),
+  ('British Telecom', 'Europe', 'AS2856', '195.99.115.5', 190, 99.950, 99.960, 24000, 'COMPLIANT'),
+  ('Deutsche Telekom', 'Europe', 'AS3320', '194.25.0.12', 210, 99.970, 99.975, 26000, 'COMPLIANT'),
+  ('Tata Communications', 'Asia Pacific', 'AS4755', '180.149.52.2', 340, 99.850, 99.820, 16000, 'BREACH')
+ON CONFLICT (carrier_name) DO NOTHING;
+
+-- 13. Regulatory Compliance Audit Logs
+CREATE TABLE IF NOT EXISTS audit_compliance_logs (
+    id SERIAL PRIMARY KEY,
+    audit_id VARCHAR(100) NOT NULL UNIQUE,
+    framework VARCHAR(50) NOT NULL,
+    specification VARCHAR(100) NOT NULL,
+    control_objective TEXT NOT NULL,
+    status VARCHAR(50) DEFAULT 'COMPLIANT',
+    audited_by VARCHAR(100) DEFAULT 'VoxPulse Automated Compliance Daemon',
+    sha256_hash VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO audit_compliance_logs (audit_id, framework, specification, control_objective, status, sha256_hash)
+VALUES 
+  ('AUD-PCI-401', 'PCI-DSS', 'Req 3.4 / 4.1', 'DTMF Credit Card Audio Redaction (160ms Mute Window)', 'COMPLIANT', 'sha256:7b92c4a89e1f827361a9bc30'),
+  ('AUD-HIPAA-402', 'HIPAA', '45 CFR § 164.312(e)', 'SRTP End-to-End Media Stream Encryption (AES-128-ICM)', 'COMPLIANT', 'sha256:94a2b109e4f58c73d91283bb'),
+  ('AUD-GDPR-403', 'GDPR', 'Article 17', 'Automated 30-Day Call Recording Purge Lifecycle', 'COMPLIANT', 'sha256:3910ca8b27fe991a0c874112')
+ON CONFLICT (audit_id) DO NOTHING;
+
+-- 14. Webhook Dispatch Queue & Dead-Letter Storage
+CREATE TABLE IF NOT EXISTS webhook_dispatch_queue (
+    id SERIAL PRIMARY KEY,
+    dispatch_id VARCHAR(100) NOT NULL UNIQUE,
+    endpoint_url TEXT NOT NULL,
+    event_type VARCHAR(100) NOT NULL,
+    attempts INTEGER DEFAULT 1,
+    max_attempts INTEGER DEFAULT 5,
+    http_status INTEGER DEFAULT 200,
+    status VARCHAR(50) DEFAULT 'DELIVERED',
+    hmac_sha256 VARCHAR(100) NOT NULL,
+    payload JSONB NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO webhook_dispatch_queue (dispatch_id, endpoint_url, event_type, attempts, http_status, status, hmac_sha256, payload)
+VALUES 
+  ('wh_901', 'https://hooks.slack.com/services/T00/B00/VOXPULSE', 'ALERT_CALL_FAILED', 1, 200, 'DELIVERED', 'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', '{"event": "ALERT_CALL_FAILED", "did": "+18005550100", "sipCode": 503}'),
+  ('wh_902', 'https://events.pagerduty.com/v2/enqueue', 'OUTAGE_EMERGENCY_911', 1, 202, 'DELIVERED', 'sha256:ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb', '{"event": "OUTAGE_EMERGENCY_911", "severity": "CRITICAL", "affectedDIDs": 14}')
+ON CONFLICT (dispatch_id) DO NOTHING;
+
+-- 15. Least Cost Routing (LCR) Rate Cards
+CREATE TABLE IF NOT EXISTS lcr_rate_cards (
+    id SERIAL PRIMARY KEY,
+    carrier_name VARCHAR(100) NOT NULL,
+    rate_center VARCHAR(100) NOT NULL,
+    country_code VARCHAR(10) DEFAULT 'US',
+    wholesale_rate_per_min DECIMAL(6,4) NOT NULL,
+    vendor_markup_rate DECIMAL(6,4) NOT NULL,
+    min_mos_guarantee DECIMAL(3,2) DEFAULT 4.20,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO lcr_rate_cards (carrier_name, rate_center, wholesale_rate_per_min, vendor_markup_rate, min_mos_guarantee)
+VALUES 
+  ('Telnyx Wholesale', 'US Domestic Toll-Free', 0.0055, 0.0380, 4.42),
+  ('Twilio Super Network', 'US Domestic Toll-Free', 0.0085, 0.0380, 4.38),
+  ('Lumen Direct IP', 'US Domestic Toll-Free', 0.0045, 0.0380, 4.30),
+  ('Arelion Global', 'UK & Europe International', 0.0090, 0.0520, 4.35)
+ON CONFLICT DO NOTHING;
+

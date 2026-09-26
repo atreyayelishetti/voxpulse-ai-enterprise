@@ -1,6 +1,6 @@
 # 🚀 VoxPulse AI - Comprehensive Handoff & Architecture Documentation
 > **Target Audience:** Claude AI / Engineers continuing development on VoxPulse AI  
-> **Status:** Production-Ready • 107 Enterprise UI Modules • 1,000 Automated Test Cases (100% Pass Rate)
+> **Status:** Production-Ready • 107 Enterprise UI Modules • 1,500 Automated Test Cases (100% Pass Rate)
 
 ---
 
@@ -10,8 +10,8 @@
 
 ### Key Highlights
 - **107 Enterprise UI Modules**: Feature-complete dark glassmorphic interface covering every telecom, DSP audio, SIP signaling, AI, and security diagnostic capability.
-- **1,000 Automated Test Cases**: 100% pass rate across 20 specialized test groups (`npm run test:1000` / `npm run test:600`).
-- **Autonomous E2E Testing**: Self-spawning test harness verifying all 14 backend REST calculation and telemetry endpoints with 100% pass rate (`npm run test:e2e`).
+- **1,500 Automated Test Cases**: 100% pass rate across 30 specialized test groups (`npm run test:1500` / `npm run test:1000` / `npm run test:600`).
+- **Autonomous E2E Testing**: Self-spawning test harness verifying all 18 backend REST calculation and telemetry endpoints with 100% pass rate (`npm run test:e2e`).
 - **Google Gemini 2.5 & 3.8 AI**: Multimodal acoustic prompt parsing, intent detection, and post-call RCA audits.
 - **Multi-Provider Telephony Egress**: Live **Telnyx PSTN**, **Twilio**, **Google Cloud CCAI**, and **PSTN Simulator**.
 - **Keycloak OIDC SSO**: Realm authentication with Bearer JWT tokens (`admin` / `password`).
@@ -42,7 +42,7 @@ ivr testing/
 ├── HANDOFF_DOCUMENTATION.md            # This handoff documentation
 │
 ├── server/                             # Node Express Backend & Telephony Core
-│   ├── index.js                        # Primary REST API routes & WebSocket server
+│   ├── index.js                        # Primary REST API routes & WebSocket server (18 endpoints)
 │   ├── telephonyAdapter.js             # Telephony abstraction (Telnyx, Twilio, CCAI, Simulator)
 │   ├── geminiEngine.js                 # Gemini 2.5/3.8 Flash prompt analysis & RCA engine
 │   ├── dtmfGenerator.js                # Web Audio 8000Hz PCM G.711u DTMF tone synthesizer
@@ -58,14 +58,15 @@ ivr testing/
 │   │
 │   ├── db/
 │   │   ├── index.js                    # PostgreSQL pool connection engine
-│   │   ├── schema.sql                  # Complete DDL tables & pre-seeded test datasets
+│   │   ├── schema.sql                  # Complete DDL tables & pre-seeded test datasets (15 tables)
 │   │   └── seed.js                     # Database seeding script (`npm run db:seed`)
 │   │
 │   └── tests/
-│       ├── comprehensive1000TestSuite.js# 1,000 automated test cases (Groups 1 to 20)
-│       ├── comprehensive600TestSuite.js # Wrapper running 1,000 automated test cases
+│       ├── comprehensive1500TestSuite.js# 1,500 automated test cases (Groups 1 to 30)
+│       ├── comprehensive1000TestSuite.js# Wrapper running comprehensive 1,500 tests
+│       ├── comprehensive600TestSuite.js # Backward-compatible 600 runner
 │       ├── comprehensive300TestSuite.js # 300 test cases
-│       └── e2eTestSuite.js             # Autonomous end-to-end integration tests
+│       └── e2eTestSuite.js             # Autonomous end-to-end integration tests (18 endpoints)
 │
 ├── keycloak/
 │   └── voxpulse-realm.json             # Keycloak realm export file
@@ -103,6 +104,10 @@ ivr testing/
 
 | Endpoint | Method | Description |
 | :--- | :---: | :--- |
+| `/api/sip/generate` | `POST` | RFC 3261 SIP message and RFC 4566 SDP Offer/Answer generator |
+| `/api/webhooks/dispatch` | `POST` | Enterprise HMAC-SHA256 signed webhook dispatcher & retry simulation |
+| `/api/loadtest/start` | `POST` | High-volume concurrent PSTN load and stress test trigger |
+| `/api/compliance/audit` | `POST` | Automated multi-standard compliance validator with SHA-256 certificate hash |
 | `/api/lufs/normalize` | `POST` | EBU R128 loudness normalization and True Peak limiter margin calculation |
 | `/api/telecom/lcr` | `POST` | Least Cost Routing (LCR) engine calculating annual cost savings vs Cyara/Klearcom |
 | `/api/erlang/calculate` | `POST` | Erlang C contact center queue delay probability, ASA, and agent staffing math |
@@ -136,22 +141,24 @@ ivr testing/
 # 1. Start Dev Application (Backend + Frontend concurrently)
 npm run dev
 
-# 2. Run the Complete 1,000 Automated Test Cases Suite
+# 2. Run the Complete 1,500 Automated Test Cases Suite
+npm run test:1500
+
+# 3. Primary Test Shortcut (Runs all 1,500 tests)
+npm run test
+
+# 4. Run Backward-Compatible Suites (Runs 1,500 / 300 tests)
 npm run test:1000
-
-# 3. Run Backward-Compatible 600 Suite (Runs all 1,000 tests)
 npm run test:600
-
-# 4. Run 300 Automated Test Cases
 npm run test:300
 
-# 5. Run Autonomous E2E Integration Tests
+# 5. Run Autonomous E2E Integration Tests (18 Endpoints Verified)
 npm run test:e2e
 
 # 6. Production Build Verification
 npm run build
 
-# 7. Seed / Re-Seed PostgreSQL Database
+# 7. Seed / Re-Seed PostgreSQL Database (15 Tables)
 npm run db:seed
 
 # 8. Launch Full Stack via Docker
@@ -160,7 +167,7 @@ docker-compose up -d
 
 ---
 
-## 📊 Summary of 1,000 Test Cases (`npm run test:1000`)
+## 📊 Summary of 1,500 Test Cases (`npm run test:1500`)
 
 | Group # | Test Category | Count | Status |
 | :---: | :--- | :---: | :---: |
@@ -184,7 +191,17 @@ docker-compose up -d
 | **Group 18** | RFC 3515 SIP REFER Call Transfers & NOTIFY Traces | 50 | PASSED |
 | **Group 19** | STIR/SHAKEN PASSporT Cryptographic Verification | 50 | PASSED |
 | **Group 20** | VoIP Codec Transcoding & Bandwidth Sizing | 50 | PASSED |
-| **TOTAL** | **Comprehensive Automated Test Cases** | **1,000** | **100% SUCCESS** |
+| **Group 21** | BGP Routing & Hop-by-Hop Autonomous System (AS) Path | 50 | PASSED |
+| **Group 22** | RFC 4733 / RFC 2833 In-Band vs Out-of-Band DTMF Relay | 50 | PASSED |
+| **Group 23** | Kari's Law & RAY BAUM'S Act Direct 911 / MSAG Dispatch | 50 | PASSED |
+| **Group 24** | ITU-T G.168 Acoustic Echo Cancellation (ERL / ERLE) | 50 | PASSED |
+| **Group 25** | Adaptive Jitter Buffer Packet Loss Concealment (PLC) | 50 | PASSED |
+| **Group 26** | Answering Machine Detection (AMD) 1000Hz Beep & Goertzel | 50 | PASSED |
+| **Group 27** | Voice Biometric Micro-Tremor & Deepfake Anti-Spoofing | 50 | PASSED |
+| **Group 28** | WebRTC SCTP DataChannel & ICE Candidate Priority | 50 | PASSED |
+| **Group 29** | Telecom Tax & Statutory Regulatory Surcharges (USF 34.6%) | 50 | PASSED |
+| **Group 30** | Multi-Tenant Enterprise Quota & Realm Isolation | 50 | PASSED |
+| **TOTAL** | **Comprehensive Automated Test Cases** | **1,500** | **100% SUCCESS** |
 
 ---
 
@@ -196,7 +213,7 @@ docker-compose up -d
    - Register item in `src/components/Sidebar.jsx`.
    - Add tab render condition in `src/App.jsx`.
 3. **Updating Database Schema**: Add `CREATE TABLE IF NOT EXISTS` and `INSERT INTO` seed statements in `server/db/schema.sql`.
-4. **Extending Test Suite**: Append new test group loops in `server/tests/comprehensive1000TestSuite.js`.
+4. **Extending Test Suite**: Append new test group loops in `server/tests/comprehensive1500TestSuite.js`.
 
 ---
-*VoxPulse AI Documentation Compiled Successfully • All 1,000 Tests Passing • Build Verified*
+*VoxPulse AI Documentation Compiled Successfully • All 1,500 Tests Passing • Build Verified*

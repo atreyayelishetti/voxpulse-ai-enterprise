@@ -141,6 +141,29 @@ async function runE2ETests() {
       interruptAtMs: 1200
     });
 
+    await assertEndpoint('POST /api/sip/generate', `${BASE_URL}/api/sip/generate`, 'POST', {
+      method: 'INVITE',
+      toUri: 'sip:support@voxpulse.io',
+      fromUri: 'sip:+18005550100@pstn.carrier.net',
+      includeSDP: true
+    });
+
+    await assertEndpoint('POST /api/webhooks/dispatch', `${BASE_URL}/api/webhooks/dispatch`, 'POST', {
+      endpoint: 'https://webhook.site/voxpulse-test',
+      event: 'ALERT_CALL_FAILED',
+      payload: { callId: 'test_call_901' }
+    });
+
+    await assertEndpoint('POST /api/loadtest/start', `${BASE_URL}/api/loadtest/start`, 'POST', {
+      concurrencyCount: 2,
+      targetNumber: '+18005550100',
+      country: 'US'
+    });
+
+    await assertEndpoint('POST /api/compliance/audit', `${BASE_URL}/api/compliance/audit`, 'POST', {
+      framework: 'ALL'
+    });
+
     console.log('=======================================================');
     console.log(`📊 E2E Test Suite Summary: ${passed} PASSED, ${failed} FAILED`);
     console.log('=======================================================');
