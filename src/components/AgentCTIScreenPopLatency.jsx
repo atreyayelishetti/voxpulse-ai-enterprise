@@ -1,48 +1,91 @@
-import React from 'react';
-import { Users, Clock } from 'lucide-react';
+import React, { useState } from 'react';
+import { Monitor, Zap, CheckCircle2, Clock, Play, RefreshCw, FileText } from 'lucide-react';
 
 export default function AgentCTIScreenPopLatency() {
-  const ctiLogs = [
-    { callId: 'call-901', agent: 'Agent Sarah M.', screenPopMs: 140, cadData: 'Account #981042', status: 'FAST (<300ms)' },
-    { callId: 'call-902', agent: 'Agent John D.', screenPopMs: 220, cadData: 'Account #402910', status: 'FAST (<300ms)' }
-  ];
+  const [latencyMs, setLatencyMs] = useState(185);
+  const [isTesting, setIsTesting] = useState(false);
+
+  const cadVariables = {
+    caller_ani: '+12125550100',
+    dnis: '+18005550199',
+    customer_name: 'Acme Logistics Inc (Enterprise VIP)',
+    account_number: 'ACCT-8849-21',
+    ivr_intent_selected: 'Dispute Transaction ($420.00)',
+    ivr_auth_status: 'PASSED_VOICE_BIOMETRICS',
+    crm_record_id: '0035000000XyZ12AAK'
+  };
+
+  const handleTestPop = () => {
+    setIsTesting(true);
+    setTimeout(() => {
+      setIsTesting(false);
+    }, 300);
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Clock color="#38bdf8" size={28} /> Agent CTI Screen-Pop CAD Data Latency Benchmark
+            <Monitor color="#06b6d4" size={28} /> Agent CTI CAD Variable & Screen-Pop Latency Meter
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '4px' }}>
-            Measure CTI CAD customer data arrival latency on agent desktop screen pops upon call answer.
+            Computer Telephony Integration (CTI) benchmark. Measures millisecond delay between incoming SIP ring and CRM customer profile rendering.
           </p>
+        </div>
+        <button 
+          className="btn btn-primary"
+          onClick={handleTestPop}
+          disabled={isTesting}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+        >
+          {isTesting ? <RefreshCw size={16} className="animate-spin" /> : <Zap size={16} />}
+          {isTesting ? 'Pushing CAD Event...' : 'Trigger Synthetic Screen-Pop'}
+        </button>
+      </div>
+
+      {/* KPI Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+        <div className="glass-card" style={{ padding: '20px' }}>
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Total Screen-Pop Latency</span>
+          <div style={{ fontSize: '2.4rem', fontWeight: 800, color: latencyMs < 300 ? '#10b981' : '#f59e0b', marginTop: '4px' }}>
+            {latencyMs} ms
+          </div>
+          <span className="badge badge-emerald" style={{ marginTop: '8px', display: 'inline-block' }}>SLA Target: &lt;500ms</span>
+        </div>
+
+        <div className="glass-card" style={{ padding: '20px' }}>
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>SIP CTI Event Dispatch</span>
+          <div style={{ fontSize: '2.4rem', fontWeight: 800, color: '#06b6d4', marginTop: '4px' }}>32 ms</div>
+          <span className="badge badge-cyan" style={{ marginTop: '8px', display: 'inline-block' }}>WebSocket Push</span>
+        </div>
+
+        <div className="glass-card" style={{ padding: '20px' }}>
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>CRM Query & Render</span>
+          <div style={{ fontSize: '2.4rem', fontWeight: 800, color: '#a855f7', marginTop: '4px' }}>153 ms</div>
+          <span className="badge badge-purple" style={{ marginTop: '8px', display: 'inline-block' }}>Salesforce / Zendesk</span>
+        </div>
+
+        <div className="glass-card" style={{ padding: '20px' }}>
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>CAD Context Match Rate</span>
+          <div style={{ fontSize: '2.4rem', fontWeight: 800, color: '#10b981', marginTop: '4px' }}>100%</div>
+          <span className="badge badge-emerald" style={{ marginTop: '8px', display: 'inline-block' }}>Zero Blank Pops</span>
         </div>
       </div>
 
+      {/* CAD Variables Inspector */}
       <div className="glass-card" style={{ padding: '24px' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.72rem' }}>
-              <th style={{ padding: '10px' }}>Call ID</th>
-              <th style={{ padding: '10px' }}>Agent Name</th>
-              <th style={{ padding: '10px' }}>Screen-Pop Render Latency</th>
-              <th style={{ padding: '10px' }}>CAD Attached Data</th>
-              <th style={{ padding: '10px' }}>SLA Grade</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ctiLogs.map((c, i) => (
-              <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                <td style={{ padding: '12px 10px', color: '#fff', fontWeight: 700 }}>{c.callId}</td>
-                <td style={{ padding: '12px 10px', color: '#06b6d4' }}>{c.agent}</td>
-                <td style={{ padding: '12px 10px', color: '#34d399', fontWeight: 700 }}>{c.screenPopMs} ms</td>
-                <td style={{ padding: '12px 10px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{c.cadData}</td>
-                <td style={{ padding: '12px 10px' }}><span className="badge badge-emerald">{c.status}</span></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <FileText size={18} color="#06b6d4" /> Synchronized CTI Call Associated Data (CAD) Payload
+        </h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+          {Object.entries(cadVariables).map(([k, v]) => (
+            <div key={k} style={{ padding: '12px 14px', background: 'rgba(0,0,0,0.3)', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{k}</span>
+              <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#38bdf8', marginTop: '2px' }}>{v}</div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

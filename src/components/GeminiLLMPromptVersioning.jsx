@@ -1,46 +1,97 @@
 import React, { useState } from 'react';
-import { Sparkles, GitBranch } from 'lucide-react';
+import { GitBranch, Sparkles, CheckCircle2, RotateCcw, Play, Sliders } from 'lucide-react';
 
 export default function GeminiLLMPromptVersioning() {
+  const [selectedVersion, setSelectedVersion] = useState('v1.3');
+
   const versions = [
-    { version: 'v2.4 (Active)', model: 'gemini-2.0-flash', prompt: 'System: You are an empathetic bank agent. Verify customer SSN before balance.', accuracy: '98.6%' },
-    { version: 'v2.3 (Staging)', model: 'gemini-2.0-flash', prompt: 'System: You are a quick customer bot. State balance immediately.', accuracy: '94.2%' }
+    {
+      id: 'v1.3',
+      name: 'v1.3 - Empathetic Conversational Banking (Active)',
+      systemPrompt: 'You are VoxPulse AI, a courteous financial assistant. Listen to the caller intent, acknowledge emotions, and directly extract actionable DTMF options or execute account queries.',
+      ttft: '142ms',
+      accuracy: '98.4%',
+      containment: '68.2%',
+      status: 'PRODUCTION'
+    },
+    {
+      id: 'v1.2',
+      name: 'v1.2 - Terse Strict Menu Extractor',
+      systemPrompt: 'You are an automated IVR bot. Map user speech strictly to [1: Balance, 2: Payments, 3: Fraud, 0: Agent]. Do not output conversational filler.',
+      ttft: '118ms',
+      accuracy: '94.1%',
+      containment: '54.0%',
+      status: 'ARCHIVED'
+    }
   ];
+
+  const current = versions.find(v => v.id === selectedVersion) || versions[0];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Sparkles color="#06b6d4" size={28} /> Gemini LLM Prompt Versioning & A/B Testing Sandbox
+            <GitBranch color="#06b6d4" size={28} /> Gemini LLM System Prompt Versioning & A/B Governance
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '4px' }}>
-            Version control, diff, and benchmark Gemini system instructions for voicebot dialog trees.
+            System prompt registry. Audits version diffs, temperature parameters, intent classification accuracy, and rollback governance.
           </p>
         </div>
       </div>
 
+      {/* KPI Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+        <div className="glass-card" style={{ padding: '20px' }}>
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Active Production Version</span>
+          <div style={{ fontSize: '2rem', fontWeight: 800, color: '#10b981', marginTop: '4px' }}>{current.id}</div>
+          <span className="badge badge-emerald" style={{ marginTop: '8px', display: 'inline-block' }}>{current.status}</span>
+        </div>
+
+        <div className="glass-card" style={{ padding: '20px' }}>
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Intent Accuracy</span>
+          <div style={{ fontSize: '2rem', fontWeight: 800, color: '#06b6d4', marginTop: '4px' }}>{current.accuracy}</div>
+          <span className="badge badge-cyan" style={{ marginTop: '8px', display: 'inline-block' }}>Benchmark Pass</span>
+        </div>
+
+        <div className="glass-card" style={{ padding: '20px' }}>
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Time-to-First-Token</span>
+          <div style={{ fontSize: '2rem', fontWeight: 800, color: '#a855f7', marginTop: '4px' }}>{current.ttft}</div>
+          <span className="badge badge-purple" style={{ marginTop: '8px', display: 'inline-block' }}>Gemini 2.5 Flash</span>
+        </div>
+
+        <div className="glass-card" style={{ padding: '20px' }}>
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Self-Service Containment</span>
+          <div style={{ fontSize: '2rem', fontWeight: 800, color: '#f59e0b', marginTop: '4px' }}>{current.containment}</div>
+          <span className="badge badge-amber" style={{ marginTop: '8px', display: 'inline-block' }}>+14.2% vs v1.2</span>
+        </div>
+      </div>
+
+      {/* Version Selector Tabs & Prompt Editor */}
       <div className="glass-card" style={{ padding: '24px' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.72rem' }}>
-              <th style={{ padding: '10px' }}>Prompt Version</th>
-              <th style={{ padding: '10px' }}>AI Model</th>
-              <th style={{ padding: '10px' }}>System Instruction Snippet</th>
-              <th style={{ padding: '10px' }}>Intent Accuracy</th>
-            </tr>
-          </thead>
-          <tbody>
-            {versions.map((v, i) => (
-              <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                <td style={{ padding: '12px 10px', color: '#fff', fontWeight: 700 }}>{v.version}</td>
-                <td style={{ padding: '12px 10px', color: '#06b6d4' }}>{v.model}</td>
-                <td style={{ padding: '12px 10px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{v.prompt}</td>
-                <td style={{ padding: '12px 10px', color: '#34d399', fontWeight: 700 }}>{v.accuracy}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+          {versions.map((v) => (
+            <button
+              key={v.id}
+              className={`btn ${selectedVersion === v.id ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setSelectedVersion(v.id)}
+            >
+              {v.name}
+            </button>
+          ))}
+        </div>
+
+        <div>
+          <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+            System Instructions / Prompt Definition
+          </label>
+          <textarea
+            value={current.systemPrompt}
+            readOnly
+            rows={5}
+            style={{ width: '100%', padding: '14px', background: 'rgba(0,0,0,0.4)', color: '#38bdf8', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', lineHeight: '1.5' }}
+          />
+        </div>
       </div>
     </div>
   );

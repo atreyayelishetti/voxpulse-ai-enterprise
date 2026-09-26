@@ -1,48 +1,88 @@
-import React from 'react';
-import { GitFork, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { Split, TrendingUp, CheckCircle2, Sliders, Trophy, Sparkles } from 'lucide-react';
 
 export default function IVRMenuOptionABTester() {
-  const abVariants = [
-    { variant: 'Variant A (Short Prompt)', prompt: 'Press 1 for balance, 2 for billing.', containment: '68.4%', winner: false },
-    { variant: 'Variant B (Conversational AI)', prompt: 'Tell me in a few words how I can help you today.', containment: '84.2%', winner: true }
-  ];
+  const [trafficSplit, setTrafficSplit] = useState(50);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Sparkles color="#06b6d4" size={28} /> Dynamic IVR Menu Prompt A/B Testing Engine
+            <Split color="#06b6d4" size={28} /> IVR Voice Prompt A/B Containment & Conversion Experiment Studio
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '4px' }}>
-            Split caller traffic across IVR prompt variants to measure containment rate optimization.
+            Split-test voice prompt variants. Compares concise DTMF menus vs generative conversational prompts with statistical significance.
           </p>
         </div>
+        <span className="badge badge-emerald" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Trophy size={14} /> Winner: Variant B (+14.2% Containment, p &lt; 0.01)
+        </span>
       </div>
 
+      {/* Traffic Split Slider */}
       <div className="glass-card" style={{ padding: '24px' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.72rem' }}>
-              <th style={{ padding: '10px' }}>A/B Variant</th>
-              <th style={{ padding: '10px' }}>Spoken Prompt Phrasing</th>
-              <th style={{ padding: '10px' }}>Self-Service Containment</th>
-              <th style={{ padding: '10px' }}>Outcome</th>
-            </tr>
-          </thead>
-          <tbody>
-            {abVariants.map((v, i) => (
-              <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                <td style={{ padding: '12px 10px', color: '#fff', fontWeight: 700 }}>{v.variant}</td>
-                <td style={{ padding: '12px 10px', color: 'var(--text-muted)', fontStyle: 'italic' }}>"{v.prompt}"</td>
-                <td style={{ padding: '12px 10px', color: '#34d399', fontWeight: 800 }}>{v.containment}</td>
-                <td style={{ padding: '12px 10px' }}>
-                  {v.winner ? <span className="badge badge-emerald">WINNER (+15.8%)</span> : <span className="badge badge-indigo">BASELINE</span>}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff' }}>Live Inbound Traffic Split Allocation</h3>
+          <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#06b6d4' }}>{trafficSplit}% Variant A / {100 - trafficSplit}% Variant B</span>
+        </div>
+        <input 
+          type="range" 
+          min="10" 
+          max="90" 
+          value={trafficSplit} 
+          onChange={(e) => setTrafficSplit(parseInt(e.target.value, 10))} 
+          style={{ width: '100%', accentColor: '#06b6d4' }} 
+        />
+      </div>
+
+      {/* A vs B Side-by-side Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+        {/* Variant A */}
+        <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#06b6d4' }}>VARIANT A (TRADITIONAL DTMF)</span>
+            <span className="badge badge-cyan">{trafficSplit}% Traffic</span>
+          </div>
+
+          <div style={{ padding: '16px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.88rem', color: '#cbd5e1', fontStyle: 'italic' }}>
+            "Welcome to Apex Bank. For Checking and Savings, press 1. For Loan inquiries, press 2. For all other issues, press 0."
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+            <div style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Containment Rate</span>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f59e0b', marginTop: '2px' }}>58.2%</div>
+            </div>
+            <div style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Average Time-in-Menu</span>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', marginTop: '2px' }}>18.4s</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Variant B */}
+        <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', borderColor: '#10b981', background: 'rgba(16, 185, 129, 0.04)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#10b981' }}>VARIANT B (CONVERSATIONAL AI)</span>
+            <span className="badge badge-emerald">{100 - trafficSplit}% Traffic • WINNER</span>
+          </div>
+
+          <div style={{ padding: '16px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', border: '1px solid #10b981', fontSize: '0.88rem', color: '#cbd5e1', fontStyle: 'italic' }}>
+            "Hi there! Welcome to Apex Bank. In a few words, tell me what you'd like to do today, like check a balance or pay a bill."
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+            <div style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Containment Rate</span>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#10b981', marginTop: '2px' }}>72.4%</div>
+            </div>
+            <div style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Average Time-in-Menu</span>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#10b981', marginTop: '2px' }}>8.2s (-55%)</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

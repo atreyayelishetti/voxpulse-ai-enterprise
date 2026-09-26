@@ -10,9 +10,11 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
+    "test": "node server/tests/comprehensive1000TestSuite.js",
     "test:e2e": "node server/tests/e2eTestSuite.js",
     "test:300": "node server/tests/comprehensive300TestSuite.js",
     "test:600": "node server/tests/comprehensive600TestSuite.js",
+    "test:1000": "node server/tests/comprehensive1000TestSuite.js",
     "db:seed": "node server/db/seed.js"
   },
   "dependencies": {
