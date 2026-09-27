@@ -57,3 +57,31 @@ export async function query(text, params) {
   }
   return { rows: [] };
 }
+
+export async function checkDbHealth() {
+  if (!pool) return { status: 'DISCONNECTED', connected: false, mode: 'IN_MEMORY' };
+  try {
+    const start = Date.now();
+    const client = await pool.connect();
+    await client.query('SELECT 1');
+    client.release();
+    return {
+      status: 'HEALTHY',
+      connected: true,
+      mode: 'POSTGRESQL',
+      rttMs: Date.now() - start,
+      poolSize: pool.totalCount || 0,
+      idleClients: pool.idleCount || 0,
+      waitingClients: pool.waitingCount || 0
+    };
+  } catch (err) {
+    return {
+      status: 'FALLBACK_IN_MEMORY',
+      connected: false,
+      mode: 'IN_MEMORY',
+      error: err.message
+    };
+  }
+}
+
+export { pool as dbPool };

@@ -285,3 +285,79 @@ VALUES
   ('Arelion Global', 'UK & Europe International', 0.0090, 0.0520, 4.35)
 ON CONFLICT DO NOTHING;
 
+-- ============================================================================
+-- 16. B2B MULTI-TENANT SAAS SCHEMAS & SEED DATA
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS saas_organizations (
+    id VARCHAR(100) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(100) UNIQUE NOT NULL,
+    subdomain VARCHAR(255) UNIQUE,
+    plan_tier VARCHAR(50) DEFAULT 'GROWTH',
+    billing_cycle VARCHAR(20) DEFAULT 'MONTHLY',
+    status VARCHAR(50) DEFAULT 'ACTIVE',
+    billing_email VARCHAR(255) NOT NULL,
+    region VARCHAR(100) DEFAULT 'US-East (Virginia)',
+    custom_branding JSONB,
+    telephony_config JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS saas_team_members (
+    id VARCHAR(100) PRIMARY KEY,
+    org_id VARCHAR(100) REFERENCES saas_organizations(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    role VARCHAR(50) DEFAULT 'TELECOM_ENGINEER',
+    status VARCHAR(50) DEFAULT 'ACTIVE',
+    two_factor BOOLEAN DEFAULT true,
+    last_active TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS saas_api_keys (
+    id VARCHAR(100) PRIMARY KEY,
+    org_id VARCHAR(100) REFERENCES saas_organizations(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    prefix VARCHAR(20) NOT NULL,
+    full_key_preview VARCHAR(100) NOT NULL,
+    scopes JSONB NOT NULL,
+    environment VARCHAR(50) DEFAULT 'PRODUCTION',
+    status VARCHAR(50) DEFAULT 'ACTIVE',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS saas_invoices (
+    id VARCHAR(100) PRIMARY KEY,
+    org_id VARCHAR(100) REFERENCES saas_organizations(id) ON DELETE CASCADE,
+    number VARCHAR(50) NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    status VARCHAR(50) DEFAULT 'PAID',
+    plan_name VARCHAR(100) NOT NULL,
+    period VARCHAR(100) NOT NULL,
+    invoice_date DATE NOT NULL,
+    payment_method VARCHAR(100),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Seed SaaS Organizations
+INSERT INTO saas_organizations (id, name, slug, subdomain, plan_tier, billing_cycle, billing_email, region)
+VALUES 
+  ('org_visa_inc', 'Visa Inc. (Global Payment Infrastructure)', 'visa-global', 'visa.voxpulse.io', 'ENTERPRISE', 'ANNUAL', 'telecom.invoicing@visa.com', 'US-East (Virginia - Ashburn Telecom Hub)'),
+  ('org_acme_corp', 'Acme Financial Services', 'acme-financial', 'acme.voxpulse.io', 'ENTERPRISE', 'ANNUAL', 'billing@acmefinance.com', 'US-East (Virginia)'),
+  ('org_healthfirst', 'HealthFirst Telehealth Systems', 'healthfirst-care', 'healthfirst.voxpulse.io', 'GROWTH', 'MONTHLY', 'telecom.ops@healthfirst.org', 'EU-Central (Frankfurt)'),
+  ('org_devrel_sandbox', 'Fintech Dev Sandbox', 'fintech-dev-sandbox', 'sandbox.voxpulse.io', 'STARTER', 'MONTHLY', 'devops@fintechsandbox.io', 'US-East (Virginia)')
+ON CONFLICT (id) DO NOTHING;
+
+-- Seed Visa Team Members
+INSERT INTO saas_team_members (id, org_id, name, email, role, status, two_factor)
+VALUES
+  ('tm_visa_1', 'org_visa_inc', 'Elena Rostova', 'elena.rostova@visa.com', 'OWNER', 'ACTIVE', true),
+  ('tm_visa_2', 'org_visa_inc', 'Marcus Vance', 'm.vance@visa.com', 'ADMIN', 'ACTIVE', true),
+  ('tm_visa_3', 'org_visa_inc', 'David Chen', 'd.chen@visa.com', 'TELECOM_ENGINEER', 'ACTIVE', true),
+  ('tm_visa_4', 'org_visa_inc', 'Sarah Jenkins', 's.jenkins@visa.com', 'COMPLIANCE_AUDITOR', 'ACTIVE', true),
+  ('tm_visa_5', 'org_visa_inc', 'Priya Patel', 'p.patel@visa.com', 'TELECOM_ENGINEER', 'ACTIVE', true)
+ON CONFLICT (id) DO NOTHING;
+
+
+

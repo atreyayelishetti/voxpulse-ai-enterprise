@@ -15,6 +15,20 @@ import {
 
 const PRESET_TEMPLATES = [
   {
+    id: 'visa_fraud_dispute',
+    name: 'Visa Advanced Authorization (VAA) & Fraud Triage',
+    description: 'Autonomous synthetic testing of Visa Cardholder hotline (1-800-VISA-911), DTMF card dispute routing, biometric voice verification, and PCI-DSS v4.0 tokenization.',
+    targetNumber: '+18008472911',
+    country: 'US',
+    steps: [
+      { action: 'EXPECT_PROMPT', description: 'Assert Visa Global Welcome Prompt', expectedText: 'Thank you for calling Visa Global Cardholder Services' },
+      { action: 'SEND_DTMF', description: 'Press 1 for Lost, Stolen, or Suspicious Card Activity', dtmfKey: '1' },
+      { action: 'EXPECT_PROMPT', description: 'Verify PCI Redacted 16-Digit PAN Input Prompt', expectedText: 'Please enter your 16-digit Visa card number followed by pound' },
+      { action: 'SEND_DTMF', description: 'Enter Test Tokenized PAN (4111...)', dtmfKey: '4' },
+      { action: 'ASSERT_ROUTING', description: 'Assert Priority Routing to Visa Fraud Triage Queue', expectedRoute: 'q_visa_fraud_triage' }
+    ]
+  },
+  {
     id: 'banking_auth',
     name: 'Enterprise Banking IVR (Account & PIN Auth)',
     description: 'Tests main welcome prompt, option 1 selection, PIN entry prompt, and automated queue handoff.',

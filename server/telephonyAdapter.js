@@ -1,6 +1,7 @@
 // Telephony Provider Adapter (Google Cloud CCAI / Phone Gateway, Twilio, Telnyx, and PSTN Mock Simulator)
 
 import dotenv from 'dotenv';
+import { genesysCloudEngine } from './genesysAdapter.js';
 dotenv.config();
 
 export class TelephonyAdapter {
@@ -28,6 +29,8 @@ export class TelephonyAdapter {
     if (provider === 'auto') {
       if (this.googleCcpEnabled) {
         selectedProvider = 'google_ccai';
+      } else if (process.env.GENESYS_CLIENT_ID) {
+        selectedProvider = 'genesys_cloud';
       } else if (this.twilioSid && this.twilioToken) {
         selectedProvider = 'twilio';
       } else if (this.telnyxKey) {
@@ -49,12 +52,14 @@ export class TelephonyAdapter {
       stepsExecuted: [],
       dtmfHistory: [],
       audioTranscripts: [],
-      carrierLatencyMs: selectedProvider === 'simulator' ? Math.floor(120 + Math.random() * 80) : 140
+      carrierLatencyMs: selectedProvider === 'simulator' ? Math.floor(120 + Math.random() * 80) : 135
     };
 
     this.activeCalls.set(callId, callState);
 
-    if (selectedProvider === 'google_ccai') {
+    if (selectedProvider === 'genesys_cloud') {
+      return this.dialGenesysCloud(callState);
+    } else if (selectedProvider === 'google_ccai') {
       return this.dialGoogleCCAI(callState, webhookUrl);
     } else if (selectedProvider === 'twilio') {
       return this.dialTwilio(callState, webhookUrl);
@@ -63,6 +68,17 @@ export class TelephonyAdapter {
     } else {
       return this.dialSimulated(callState);
     }
+  }
+
+  async dialGenesysCloud(callState) {
+    console.log(`[Genesys Cloud CX Engine] Placing automated test call to ${callState.targetPhoneNumber} via customer Genesys Cloud GCV/BYOC trunk`);
+    const gcCall = await genesysCloudEngine.initiateCall({ targetPhoneNumber: callState.targetPhoneNumber });
+    callState.genesysConversationId = gcCall.conversationId;
+    callState.genesysParticipantId = gcCall.participantId;
+    callState.status = 'CONNECTED';
+    callState.answerTime = Date.now() + 480;
+    callState.carrierRoute = 'Genesys Cloud CX (GCV / BYOC Trunk)';
+    return callState;
   }
 
   async dialGoogleCCAI(callState, webhookUrl) {
@@ -151,6 +167,10 @@ export class TelephonyAdapter {
       sentMs: Date.now() - call.startTime
     });
 
+    if (call.genesysConversationId) {
+      await genesysCloudEngine.sendDTMF(call.genesysConversationId, dtmfDigit).catch(() => {});
+    }
+
     console.log(`[Telephony] Sent DTMF Tone '${dtmfDigit}' on Call ${callId}`);
     return { success: true, digit: dtmfDigit, callId };
   }
@@ -160,6 +180,9 @@ export class TelephonyAdapter {
     if (call) {
       call.status = 'COMPLETED';
       call.durationMs = Date.now() - call.startTime;
+      if (call.genesysConversationId) {
+        await genesysCloudEngine.terminateCall(call.genesysConversationId).catch(() => {});
+      }
     }
     return { success: true, callId };
   }

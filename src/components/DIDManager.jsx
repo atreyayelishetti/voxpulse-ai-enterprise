@@ -12,6 +12,12 @@ import {
 } from 'lucide-react';
 
 const INITIAL_DIDS = [
+  { id: 101, phone: '+1 (800) 847-2911', country: 'US', countryName: 'United States', carrier: 'Visa GCV / AT&T (1-800-VISA-911)', status: 'ACTIVE', sla: 99.999, latency: '16ms' },
+  { id: 102, phone: '+1 (800) 252-4370', country: 'US', countryName: 'United States', carrier: 'Visa Fraud Triage / Verizon', status: 'ACTIVE', sla: 99.999, latency: '21ms' },
+  { id: 103, phone: '+1 (800) 523-4116', country: 'US', countryName: 'United States', carrier: 'Visa Merchant POS / Ashburn SBC', status: 'ACTIVE', sla: 99.999, latency: '12ms' },
+  { id: 104, phone: '+1 (800) 847-2912', country: 'US', countryName: 'United States', carrier: 'Visa 3D-Secure 2.0 / Telnyx', status: 'ACTIVE', sla: 99.995, latency: '24ms' },
+  { id: 105, phone: '+44 (20) 7937-8091', country: 'UK', countryName: 'United Kingdom', carrier: 'Visa Europe / BT London SBC', status: 'ACTIVE', sla: 99.990, latency: '82ms' },
+  { id: 106, phone: '+65 6658 3000', country: 'SG', countryName: 'Singapore', carrier: 'Visa APAC Regional / Singtel', status: 'ACTIVE', sla: 99.990, latency: '142ms' },
   { id: 1, phone: '+1 (800) 555-0100', country: 'US', countryName: 'United States', carrier: 'AT&T / Verizon', status: 'ACTIVE', sla: 99.99, latency: '42ms' },
   { id: 2, phone: '+44 (20) 7946-0000', country: 'UK', countryName: 'United Kingdom', carrier: 'BT / Vodafone', status: 'ACTIVE', sla: 99.95, latency: '112ms' },
   { id: 3, phone: '+49 (69) 1234-5678', country: 'DE', countryName: 'Germany', carrier: 'Deutsche Telekom', status: 'ACTIVE', sla: 99.98, latency: '128ms' },

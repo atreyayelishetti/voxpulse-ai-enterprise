@@ -295,3 +295,12 @@ body {
   color: var(--text-muted);
   letter-spacing: 1px;
 }
+
+/* SaaS Header Responsive Navigation */
+.saas-nav-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.saas-nav-scroll::-webkit-scrollbar {
+  display: none;
+}

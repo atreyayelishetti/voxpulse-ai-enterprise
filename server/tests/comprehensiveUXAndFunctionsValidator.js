@@ -79,7 +79,7 @@ async function runUXAndFunctionValidation() {
           const isKnown = declaredFuncs.has(expr) || 
                           stateSetters.has(expr) || 
                           importedIdentifiers.has(expr) || 
-                          ['onLoginSuccess', 'onRunTest', 'onNavigate', 'setActiveTab'].includes(expr);
+                          ['onLoginSuccess', 'onRunTest', 'onNavigate', 'setActiveTab', 'onOpenLandingPage'].includes(expr);
           if (isKnown) {
             validOnClickHandlers++;
           } else {

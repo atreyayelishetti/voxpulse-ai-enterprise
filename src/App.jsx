@@ -107,9 +107,29 @@ import ExecutiveSlaPdfExporter from './components/ExecutiveSlaPdfExporter';
 import LoginScreen from './components/LoginScreen';
 import { LogOut, UserCheck, Shield } from 'lucide-react';
 
-export default function App() {
-  const [activeTab, setActiveTab] = useState('console');
+import SaaSHeader from './saas/SaaSHeader';
+import SaaSSubscriptionBilling from './saas/SaaSSubscriptionBilling';
+import SaaSUsageMetering from './saas/SaaSUsageMetering';
+import SaaSTeamManagement from './saas/SaaSTeamManagement';
+import SaaSApiKeysWebhooks from './saas/SaaSApiKeysWebhooks';
+import SaaSSuperAdminPortal from './saas/SaaSSuperAdminPortal';
+import SaaSLandingPage from './saas/SaaSLandingPage';
+import SaaSOnboardingWizard from './saas/SaaSOnboardingWizard';
+import GenesysCloudIntegration from './saas/GenesysCloudIntegration';
+import EnterpriseAuditVault from './saas/EnterpriseAuditVault';
+import EnterpriseIncidentCenter from './saas/EnterpriseIncidentCenter';
+import MaintenanceWindows from './saas/MaintenanceWindows';
+import MultiRegionLatencyRadar from './saas/MultiRegionLatencyRadar';
+import CopilotChat from './copilot/CopilotChat';
+
+export default function App({ initialTab } = {}) {
+
+  const [activeTab, setActiveTab] = useState(initialTab || 'console');
   const [systemConfig, setSystemConfig] = useState(null);
+  const [currentOrg, setCurrentOrg] = useState(null);
+  const [organizations, setOrganizations] = useState([]);
+  const [showLandingPage, setShowLandingPage] = useState(false);
+  const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
 
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('voxpulse_user');
@@ -121,7 +141,57 @@ export default function App() {
 
   useEffect(() => {
     fetchConfig();
+    fetchSaasContext();
   }, []);
+
+  const fetchSaasContext = async () => {
+    try {
+      const [currRes, listRes] = await Promise.all([
+        fetch('/api/saas/organizations/current'),
+        fetch('/api/saas/organizations')
+      ]);
+      const currData = await currRes.json();
+      const listData = await listRes.json();
+      if (currData.success) setCurrentOrg(currData.organization);
+      if (listData.success) setOrganizations(listData.organizations);
+    } catch (e) {
+      console.warn('Could not fetch SaaS context:', e);
+    }
+  };
+
+  const handleSwitchOrg = async (orgId) => {
+    try {
+      const res = await fetch('/api/saas/organizations/switch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orgId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCurrentOrg(data.organization);
+        fetchSaasContext();
+      }
+    } catch (err) {
+      console.error('Failed to switch organization:', err);
+    }
+  };
+
+  const handleCreateOrg = async (orgPayload) => {
+    try {
+      const res = await fetch('/api/saas/organizations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orgPayload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCurrentOrg(data.organization);
+        fetchSaasContext();
+      }
+    } catch (err) {
+      console.error('Failed to create organization:', err);
+    }
+  };
 
   const fetchConfig = async () => {
     try {
@@ -163,84 +233,117 @@ export default function App() {
     }
   };
 
+  if (showLandingPage) {
+    return (
+      <SaaSLandingPage 
+        onEnterApp={() => setShowLandingPage(false)} 
+        onStartTrial={() => {
+          setShowLandingPage(false);
+          setShowOnboardingWizard(true);
+        }} 
+      />
+    );
+  }
+
+  if (showOnboardingWizard) {
+    return (
+      <SaaSOnboardingWizard 
+        onComplete={(newOrg) => {
+          setShowOnboardingWizard(false);
+          if (newOrg) fetchSaasContext();
+        }}
+        onCancel={() => setShowOnboardingWizard(false)}
+      />
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <LoginScreen 
         onLoginSuccess={handleLoginSuccess} 
         systemConfig={systemConfig} 
+        onOpenLandingPage={() => setShowLandingPage(true)}
       />
     );
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
-      {/* Sidebar */}
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)', overflowX: 'hidden', width: '100%' }}>
+      {/* Sidebar with User Profile & Session Controls */}
       <Sidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
         systemConfig={systemConfig} 
+        user={user}
+        onLogout={handleLogout}
+        currentOrg={currentOrg}
       />
 
       {/* Main Content Area */}
       <main style={{
         marginLeft: '270px',
         flex: 1,
+        minWidth: 0,
         padding: '32px 40px',
         maxWidth: '1500px',
-        width: 'calc(100% - 270px)'
+        width: 'calc(100% - 270px)',
+        boxSizing: 'border-box'
       }}>
-        {/* Top Header Bar for Authenticated User Session */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border-color)',
-          borderRadius: '12px',
-          padding: '12px 20px',
-          marginBottom: '28px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#fff',
-              fontWeight: 700,
-              fontSize: '0.9rem'
-            }}>
-              {user?.name ? user.name.charAt(0) : 'A'}
-            </div>
-            <div>
-              <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {user?.name || 'VoxPulse Admin'}
-                <span className="badge badge-emerald" style={{ fontSize: '0.65rem', padding: '2px 6px' }}>
-                  <Shield size={10} /> {(user?.role || 'ADMIN').toUpperCase()}
-                </span>
-              </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                {user?.email || 'admin@voxpulse.internal'} • Realm: <strong style={{ color: '#06b6d4' }}>{user?.realm || 'voxpulse-realm'}</strong>
-              </div>
-            </div>
-          </div>
+        {/* Top Header: Enterprise SaaS Organization & Quota Switcher */}
+        <SaaSHeader 
+          currentOrg={currentOrg} 
+          organizations={organizations} 
+          onSwitchOrg={handleSwitchOrg} 
+          onCreateOrg={handleCreateOrg} 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          user={user} 
+          onLogout={handleLogout} 
+          onOpenLandingPage={() => setShowLandingPage(true)} 
+        />
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <span style={{ fontSize: '0.75rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(16, 185, 129, 0.1)', padding: '4px 10px', borderRadius: '6px' }}>
-              <UserCheck size={14} /> Keycloak Session Active
-            </span>
-            <button 
-              onClick={handleLogout}
-              className="btn btn-rose" 
-              style={{ padding: '6px 14px', fontSize: '0.8rem', borderRadius: '8px' }}
-            >
-              <LogOut size={14} /> Sign Out
-            </button>
-          </div>
-        </div>
+        {/* Dedicated SaaS Management Modules */}
+        {activeTab === 'saas-billing' && (
+          <SaaSSubscriptionBilling currentOrg={currentOrg} onRefreshOrg={fetchSaasContext} />
+        )}
+
+        {activeTab === 'saas-usage' && (
+          <SaaSUsageMetering currentOrg={currentOrg} />
+        )}
+
+        {activeTab === 'saas-team' && (
+          <SaaSTeamManagement currentOrg={currentOrg} />
+        )}
+
+        {activeTab === 'saas-developers' && (
+          <SaaSApiKeysWebhooks currentOrg={currentOrg} />
+        )}
+
+        {activeTab === 'saas-admin' && (
+          <SaaSSuperAdminPortal onSwitchTenant={handleSwitchOrg} />
+        )}
+
+        {activeTab === 'saas-genesys' && (
+          <GenesysCloudIntegration />
+        )}
+
+        {activeTab === 'saas-audit' && (
+          <EnterpriseAuditVault currentOrg={currentOrg} />
+        )}
+
+        {activeTab === 'saas-incidents' && (
+          <EnterpriseIncidentCenter currentOrg={currentOrg} />
+        )}
+
+        {activeTab === 'saas-maintenance' && (
+          <MaintenanceWindows currentOrg={currentOrg} />
+        )}
+
+        {activeTab === 'saas-geolatency' && (
+          <MultiRegionLatencyRadar currentOrg={currentOrg} />
+        )}
+
+
         {activeTab === 'console' && (
           <LiveCallConsole 
             systemConfig={systemConfig} 
@@ -672,6 +775,14 @@ export default function App() {
           <AnalyticsReports />
         )}
       </main>
+
+      {/* Floating Copilot AI Telephony Assistant */}
+      <CopilotChat
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        currentOrg={currentOrg}
+        user={user}
+      />
     </div>
   );
 }

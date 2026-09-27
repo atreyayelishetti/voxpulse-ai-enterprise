@@ -45,7 +45,13 @@ jobs:
       - name: 🖱️ Validate UX Clicks & Platform Functions (107 UI Modules)
         run: npm run test:ux
 
-      - name: 🌐 Execute End-to-End REST Integration Suite (18 Endpoints)
+      - name: 🛡️ Enterprise Hardening & Infosec Suite (38 Modules)
+        run: npm run test:hardening
+
+      - name: 🏢 Multi-Tenant SaaS & Genesys Cloud CX Suite (100 Modules)
+        run: npm run test:saas
+
+      - name: 🌐 Execute End-to-End REST Integration Suite (55 Endpoints)
         run: npm run test:e2e
 
       - name: 🗄️ Validate PostgreSQL Database Seed & Schema (15 Tables)

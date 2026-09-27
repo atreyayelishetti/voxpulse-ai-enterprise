@@ -19,6 +19,8 @@
     "test:600": "node server/tests/comprehensive1500TestSuite.js",
     "test:1000": "node server/tests/comprehensive1500TestSuite.js",
     "test:1500": "node server/tests/comprehensive1500TestSuite.js",
+    "test:saas": "node server/tests/saasTestSuite.js",
+    "test:hardening": "node server/tests/enterpriseHardeningTestSuite.js",
     "test:ux": "node server/tests/comprehensiveUXAndFunctionsValidator.js",
     "db:seed": "node server/db/seed.js"
   },
@@ -28,8 +30,11 @@
     "cors": "^2.8.6",
     "dotenv": "^18.0.4",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
     "lucide-react": "^1.48.0",
     "pg": "^8.16.3",
+    "prom-client": "^15.1.3",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "ws": "^8.21.3"
