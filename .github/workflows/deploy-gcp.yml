@@ -39,6 +39,15 @@ jobs:
             --allow-unauthenticated \
             --set-env-vars NODE_ENV=production,GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }},TELNYX_API_KEY=${{ secrets.TELNYX_API_KEY }}
 
+      - name: 🧹 Prune Old Cloud Run Revisions (Keep Only Latest 1)
+        if: steps.gcp-auth.outcome == 'success'
+        run: |
+          OLD_REVISIONS=$(gcloud run revisions list --service voxpulse-ai --region us-central1 --format='value(metadata.name)' | tail -n +2)
+          for rev in $OLD_REVISIONS; do
+            echo "Pruning old revision: $rev"
+            gcloud run revisions delete "$rev" --region us-central1 --quiet || true
+          done
+
       - name: ℹ️ Deployment Status Notice
         if: steps.gcp-auth.outcome != 'success'
         run: |
