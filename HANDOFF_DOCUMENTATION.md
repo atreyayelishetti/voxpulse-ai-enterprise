@@ -44,12 +44,14 @@ VoxPulse AI is deployed and live on Google Cloud Platform:
 | **Live Public URL** | [**https://voxpulse-ai-752915092336.us-central1.run.app**](https://voxpulse-ai-752915092336.us-central1.run.app) |
 | **GCP Project ID** | `voxpulse-ai-enterprise` |
 | **GCP Project Number** | `752915092336` |
-| **Cloud Run Service** | `voxpulse-ai` (Revision: `voxpulse-ai-00001-8hq`) |
+| **Cloud Run Service** | `voxpulse-ai` (Active Revision: `voxpulse-ai-00002-kxn`) |
 | **Region** | `us-central1` |
 | **Runtime Architecture** | Multi-stage Docker container (Vite Build + Node 20 Express) |
 | **Networking & TLS** | Automatic Google Managed TLS Certificate on port 443 |
 | **Session Affinity** | Enabled (`--session-affinity`) for stateful WebSocket connections |
-| **Scaling Policy** | 0 to 5 instances (scales to zero when idle for $0/mo hosting cost) |
+| **Scaling Policy** | 0 to 5 instances (scales to zero when idle for $0.00 compute cost) |
+| **Artifact Policy** | Single-image retention (`keepCount: 1`), keeping repository size ~75 MB |
+| **Storage Lifecycle** | 24-hour auto-prune on build archives (`gs://run-sources-...`) |
 | **Environment Variables** | `NODE_ENV=production`, `PORT=8080`, `GEMINI_API_KEY`, `TELNYX_API_KEY` |
 
 To redeploy updates at any time:
@@ -76,7 +78,9 @@ gcloud run deploy voxpulse-ai \
 ```
 ivr testing/
 ├── .env                                # Environment credentials & API keys
-├── .github/workflows/ci.yml            # Automated GitHub Actions CI/CD pipeline
+├── .github/workflows/
+│   ├── ci.yml                          # 3-tier automated pull-request validation
+│   └── deploy-gcp.yml                  # Push-to-deploy Google Cloud Run workflow with auto-pruning
 ├── docker-compose.yml                  # Docker orchestration (Postgres, Keycloak, Backend, Frontend)
 ├── package.json                        # Dependencies & npm script shortcuts
 ├── HANDOFF_DOCUMENTATION.md            # This handoff documentation

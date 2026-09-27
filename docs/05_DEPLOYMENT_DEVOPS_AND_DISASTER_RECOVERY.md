@@ -182,4 +182,28 @@ gcloud run deploy voxpulse-ai \
 ```
 
 ---
+
+## 6. GCP Cost Control, Resource Retention & Single-Container Policy
+
+To guarantee **$0.00 spend** under Google Cloud's permanent Free Tier even after initial trial credits expire:
+
+### 1. Scale-to-Zero Compute (`min-instances = 0`)
+- Cloud Run instances automatically shut down completely after 15 minutes of inactivity.
+- While idle, instances consume **0 vCPU and 0 RAM**, yielding **$0.00/month** compute charges.
+- Monthly Free Tier covers **2,000,000 requests** and **360,000 vCPU-seconds** perpetually.
+
+### 2. Artifact Registry Single-Image Retention Policy
+- Repository: `us-central1-docker.pkg.dev/voxpulse-ai-enterprise/cloud-run-source-deploy`
+- Retention Policy: `keep-only-1-version` with `keepCount: 1`.
+- Any previous container image digests are purged automatically, keeping storage usage at **~75 MB** (well below the **500 MB** Free Tier threshold).
+
+### 3. Cloud Storage Lifecycle Management
+- Bucket: `gs://run-sources-voxpulse-ai-enterprise-us-central1/`
+- Lifecycle Rule: 24-hour auto-prune on temporary build source zip archives.
+
+### 4. CI/CD Automated Pruning Pipeline
+- Workflow: `.github/workflows/deploy-gcp.yml`
+- Upon every successful deployment, an automated script queries `gcloud run revisions list` and automatically deletes superseded inactive revisions, ensuring only the latest revision remains active.
+
+---
 *VoxPulse AI Deployment Playbook • Docker Compose, Google Cloud Run & CI/CD Tested*
